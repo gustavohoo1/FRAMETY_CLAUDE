@@ -104,6 +104,14 @@ export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
 });
 
+// Safe registration schema - prevents setting role and active status
+export const registerUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  papel: true,
+  ativo: true,
+});
+
 export const insertTipoVideoSchema = createInsertSchema(tiposDeVideo).omit({
   id: true,
 });
@@ -128,6 +136,7 @@ export const insertLogStatusSchema = createInsertSchema(logsDeStatus).omit({
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+export type RegisterUser = z.infer<typeof registerUserSchema>;
 export type TipoVideo = typeof tiposDeVideo.$inferSelect;
 export type InsertTipoVideo = z.infer<typeof insertTipoVideoSchema>;
 export type Tag = typeof tags.$inferSelect;

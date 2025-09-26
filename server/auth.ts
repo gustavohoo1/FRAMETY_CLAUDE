@@ -6,7 +6,7 @@ import connectPg from "connect-pg-simple";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
-import { User as SelectUser } from "@shared/schema";
+import { User as SelectUser, registerUserSchema } from "@shared/schema";
 import { pool } from "./db";
 
 declare global {
@@ -83,21 +83,30 @@ export function setupAuth(app: Express) {
 
   app.post("/api/register", async (req, res, next) => {
     try {
-      const existingUser = await storage.getUserByEmail(req.body.email);
+      // Validate input using safe registration schema
+      const validatedData = registerUserSchema.parse(req.body);
+      
+      const existingUser = await storage.getUserByEmail(validatedData.email);
       if (existingUser) {
         return res.status(400).json({ message: "Email já está em uso" });
       }
 
+      // Create user with safe defaults: force Membro role and active status
       const user = await storage.createUser({
-        ...req.body,
-        password: await hashPassword(req.body.password),
+        ...validatedData,
+        password: await hashPassword(validatedData.password),
+        papel: "Membro",
+        ativo: true,
       });
 
       req.login(user, (err) => {
         if (err) return next(err);
         res.status(201).json(user);
       });
-    } catch (error) {
+    } catch (error: any) {
+      if (error.name === "ZodError") {
+        return res.status(400).json({ message: "Dados inválidos", errors: error.errors });
+      }
       next(error);
     }
   });
