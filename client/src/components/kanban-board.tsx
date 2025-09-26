@@ -5,6 +5,7 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Plus, CheckCircle } from "lucide-react";
 import { ProjectCard } from "./project-card";
+import { EditProjectModal } from "./edit-project-modal";
 import { ProjetoWithRelations } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -33,6 +34,7 @@ export function KanbanBoard({ filters }: KanbanBoardProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
+  const [editingProject, setEditingProject] = useState<ProjetoWithRelations | null>(null);
 
   const { data: projetos = [], isLoading } = useQuery<ProjetoWithRelations[]>({
     queryKey: ["/api/projetos", filters],
@@ -41,7 +43,7 @@ export function KanbanBoard({ filters }: KanbanBoardProps) {
       
       // Exclude "Aprovado" status from dashboard view
       Object.entries(filters || {}).forEach(([key, value]) => {
-        if (value && value !== "all") params.append(key, value);
+        if (value && value !== "all" && value !== "") params.append(key, value);
       });
       
       const response = await fetch(`/api/projetos?${params}`, {
@@ -206,6 +208,7 @@ export function KanbanBoard({ filters }: KanbanBoardProps) {
                                 <ProjectCard
                                   projeto={projeto}
                                   isDragging={snapshot.isDragging || draggedItem === projeto.id}
+                                  onEdit={setEditingProject}
                                 />
                               </div>
                             )}
@@ -221,6 +224,17 @@ export function KanbanBoard({ filters }: KanbanBoardProps) {
           );
         })}
       </div>
+      
+      <EditProjectModal
+        project={editingProject}
+        isOpen={!!editingProject}
+        onClose={() => setEditingProject(null)}
+        onSave={() => {
+          queryClient.invalidateQueries({ queryKey: ["/api/projetos"] });
+          queryClient.invalidateQueries({ queryKey: ["/api/metricas"] });
+          setEditingProject(null);
+        }}
+      />
     </DragDropContext>
   );
 }
