@@ -102,15 +102,7 @@ export function KanbanBoard({ filters }: KanbanBoardProps) {
     const projeto = projetos.find(p => p.id === draggableId);
     if (!projeto) return;
 
-    // Check authorization for status change
-    if (user?.papel === "Membro" && projeto.responsavelId !== user.id) {
-      toast({
-        title: "Acesso negado",
-        description: "Você só pode alterar o status dos seus próprios projetos.",
-        variant: "destructive",
-      });
-      return;
-    }
+    // Allow all authenticated users to change project status
 
     if (projeto.status !== newStatus) {
       updateProjectMutation.mutate({ id: draggableId, status: newStatus });

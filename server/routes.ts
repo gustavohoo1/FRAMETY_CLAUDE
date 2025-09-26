@@ -106,10 +106,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Projeto não encontrado" });
       }
 
-      // Check authorization
-      if (req.user!.papel === "Membro" && projetoExistente.responsavelId !== req.user!.id) {
-        return res.status(403).json({ message: "Você só pode editar seus próprios projetos" });
-      }
+      // Allow all authenticated users to edit any project
 
       const validatedData = insertProjetoSchema.partial().parse(req.body);
       
