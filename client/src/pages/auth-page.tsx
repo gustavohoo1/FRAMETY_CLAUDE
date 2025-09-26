@@ -77,7 +77,7 @@ export default function AuthPage() {
               <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
                 <Video className="w-6 h-6 text-primary-foreground" />
               </div>
-              <h1 className="text-3xl font-bold text-foreground">VideoFlow</h1>
+              <h1 className="text-3xl font-bold text-foreground">FRAMETY</h1>
             </div>
             <p className="text-muted-foreground">
               Sistema de gestão de projetos de vídeo
@@ -156,7 +156,7 @@ export default function AuthPage() {
                 <CardHeader>
                   <CardTitle>Criar Conta</CardTitle>
                   <CardDescription>
-                    Cadastre-se para começar a usar o VideoFlow
+                    Cadastre-se para começar a usar o FRAMETY
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
