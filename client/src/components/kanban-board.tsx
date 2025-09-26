@@ -87,6 +87,28 @@ export function KanbanBoard({ filters }: KanbanBoardProps) {
     },
   });
 
+  const deleteProjectMutation = useMutation({
+    mutationFn: async (projetoId: string) => {
+      await apiRequest("DELETE", `/api/projetos/${projetoId}`);
+      return { success: true };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/projetos"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/metricas"] });
+      toast({
+        title: "Projeto removido",
+        description: "O projeto foi removido com sucesso.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao remover projeto",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const onDragStart = (start: any) => {
     setDraggedItem(start.draggableId);
   };
@@ -200,6 +222,7 @@ export function KanbanBoard({ filters }: KanbanBoardProps) {
                                   projeto={projeto}
                                   isDragging={snapshot.isDragging || draggedItem === projeto.id}
                                   onEdit={setEditingProject}
+                                  onDelete={(projetoId) => deleteProjectMutation.mutate(projetoId)}
                                 />
                               </div>
                             )}

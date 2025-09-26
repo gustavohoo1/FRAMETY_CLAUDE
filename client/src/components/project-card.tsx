@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Calendar, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar, AlertTriangle, Trash2 } from "lucide-react";
 import { ProjetoWithRelations } from "@shared/schema";
 import { format, isPast } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -10,6 +11,7 @@ interface ProjectCardProps {
   projeto: ProjetoWithRelations;
   isDragging?: boolean;
   onEdit?: (projeto: ProjetoWithRelations) => void;
+  onDelete?: (projetoId: string) => void;
 }
 
 const priorityColors = {
@@ -30,7 +32,7 @@ const statusColors = {
   "Cancelado": "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200",
 };
 
-export function ProjectCard({ projeto, isDragging, onEdit }: ProjectCardProps) {
+export function ProjectCard({ projeto, isDragging, onEdit, onDelete }: ProjectCardProps) {
   const isOverdue = projeto.dataPrevistaEntrega && 
     isPast(new Date(projeto.dataPrevistaEntrega)) && 
     !["Aprovado", "Cancelado"].includes(projeto.status);
@@ -56,13 +58,29 @@ export function ProjectCard({ projeto, isDragging, onEdit }: ProjectCardProps) {
           <h4 className="text-sm font-semibold text-foreground line-clamp-2" data-testid="project-title">
             {projeto.titulo}
           </h4>
-          <Badge 
-            variant={priorityColors[projeto.prioridade]}
-            className="text-xs"
-            data-testid="project-priority"
-          >
-            {projeto.prioridade}
-          </Badge>
+          <div className="flex items-center space-x-2">
+            <Badge 
+              variant={priorityColors[projeto.prioridade]}
+              className="text-xs"
+              data-testid="project-priority"
+            >
+              {projeto.prioridade}
+            </Badge>
+            {onDelete && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(projeto.id);
+                }}
+                data-testid={`delete-project-${projeto.id}`}
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            )}
+          </div>
         </div>
       </CardHeader>
       

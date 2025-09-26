@@ -189,6 +189,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteProjeto(id: string): Promise<void> {
+    // First delete all related status logs
+    await db.delete(logsDeStatus).where(eq(logsDeStatus.projetoId, id));
+    
+    // Then delete the project
     await db.delete(projetos).where(eq(projetos.id, id));
   }
 
@@ -233,9 +237,11 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getMetricas() {
+    // Contar apenas projetos ativos (excluindo "Aprovado")
     const totalProjetos = await db
       .select({ count: sql<number>`count(*)` })
-      .from(projetos);
+      .from(projetos)
+      .where(sql`${projetos.status} != 'Aprovado'`);
 
     const projetosPorStatus = await db
       .select({

@@ -132,7 +132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/projetos/:id", requireAuth, requireRole(["Admin", "Gestor"]), async (req, res, next) => {
+  app.delete("/api/projetos/:id", requireAuth, async (req, res, next) => {
     try {
       const projeto = await storage.getProjeto(req.params.id);
       if (!projeto) {
