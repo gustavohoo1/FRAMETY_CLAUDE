@@ -40,7 +40,7 @@ export const tags = pgTable("tags", {
 
 export const clientes = pgTable("clientes", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  nome: text("nome").notNull().unique(),
+  nome: text("nome").notNull(),
   empresa: text("empresa"),
   email: text("email"),
   telefone: text("telefone"),
