@@ -80,7 +80,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/projetos", requireAuth, requireRole(["Admin", "Gestor"]), async (req, res, next) => {
+  app.post("/api/projetos", requireAuth, async (req, res, next) => {
     try {
       const validatedData = insertProjetoSchema.parse(req.body);
       const projeto = await storage.createProjeto(validatedData);
@@ -99,7 +99,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/projetos/:id", requireAuth, async (req, res, next) => {
+  app.patch("/api/projetos/:id", requireAuth, requireRole(["Admin", "Gestor"]), async (req, res, next) => {
     try {
       const projetoExistente = await storage.getProjeto(req.params.id);
       if (!projetoExistente) {
@@ -132,7 +132,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/projetos/:id", requireAuth, async (req, res, next) => {
+  app.delete("/api/projetos/:id", requireAuth, requireRole(["Admin", "Gestor"]), async (req, res, next) => {
     try {
       const projeto = await storage.getProjeto(req.params.id);
       if (!projeto) {

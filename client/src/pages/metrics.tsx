@@ -10,6 +10,10 @@ const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 export default function Metrics() {
   const { data: metricas, isLoading } = useQuery<any>({
     queryKey: ["/api/metricas"],
+    refetchInterval: 30000, // Atualiza a cada 30 segundos
+    refetchOnWindowFocus: true, // Atualiza quando volta ao foco da janela
+    refetchOnReconnect: true, // Atualiza quando reconecta à internet
+    staleTime: 0, // Dados sempre considerados desatualizados para forçar refetch
   });
 
   if (isLoading) {

@@ -32,6 +32,10 @@ export default function Dashboard() {
 
   const { data: metricas } = useQuery<any>({
     queryKey: ["/api/metricas"],
+    refetchInterval: 30000, // Atualiza a cada 30 segundos
+    refetchOnWindowFocus: true, // Atualiza quando volta ao foco da janela
+    refetchOnReconnect: true, // Atualiza quando reconecta à internet
+    staleTime: 0, // Dados sempre considerados desatualizados para forçar refetch
   });
 
   // Seed data mutation for development

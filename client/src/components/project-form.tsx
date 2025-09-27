@@ -14,7 +14,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { z } from "zod";
 
 const formSchema = insertProjetoSchema.extend({
-  tags: z.string().optional(),
+  tags: z.string().optional(), // Form uses string, will convert to array before submit
 });
 
 type FormData = z.infer<typeof formSchema>;
