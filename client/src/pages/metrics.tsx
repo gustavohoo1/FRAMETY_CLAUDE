@@ -48,6 +48,11 @@ export default function Metrics() {
     projetos: count,
   }));
 
+  const clienteData = Object.entries(metricas?.videosPorCliente || {}).map(([cliente, count]) => ({
+    name: cliente,
+    videos: count,
+  }));
+
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar />
@@ -68,7 +73,7 @@ export default function Metrics() {
             <div className="max-w-7xl mx-auto px-6 space-y-6">
               
               {/* Overview Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Total de Projetos</CardTitle>
@@ -79,7 +84,37 @@ export default function Metrics() {
                       {metricas?.totalProjetos || 0}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Projetos no sistema
+                      Excluindo aprovados
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Projetos Aprovados</CardTitle>
+                    <TrendingUp className="h-4 w-4 text-chart-4" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-chart-4" data-testid="approved-projects">
+                      {metricas?.projetosAprovados || 0}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Projetos finalizados
+                    </p>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Projetos Ativos</CardTitle>
+                    <Users className="h-4 w-4 text-chart-1" />
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-2xl font-bold text-chart-1" data-testid="active-projects">
+                      {metricas?.projetosAtivos || 0}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Em produção
                     </p>
                   </CardContent>
                 </Card>
@@ -102,32 +137,32 @@ export default function Metrics() {
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Taxa de Conclusão</CardTitle>
-                    <TrendingUp className="h-4 w-4 text-chart-4" />
+                    <TrendingUp className="h-4 w-4 text-chart-2" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-chart-4" data-testid="completion-rate">
-                      {metricas?.totalProjetos > 0 
-                        ? Math.round(((metricas.projetosPorStatus?.["Aprovado"] || 0) / metricas.totalProjetos) * 100)
+                    <div className="text-2xl font-bold text-chart-2" data-testid="completion-rate">
+                      {(metricas?.totalProjetos || 0) + (metricas?.projetosAprovados || 0) > 0 
+                        ? Math.round(((metricas?.projetosAprovados || 0) / ((metricas?.totalProjetos || 0) + (metricas?.projetosAprovados || 0))) * 100)
                         : 0
                       }%
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Projetos aprovados
+                      Taxa geral
                     </p>
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Produtividade</CardTitle>
-                    <Users className="h-4 w-4 text-chart-1" />
+                    <CardTitle className="text-sm font-medium">Membros Ativos</CardTitle>
+                    <Users className="h-4 w-4 text-chart-3" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold text-chart-1" data-testid="productivity-score">
+                    <div className="text-2xl font-bold text-chart-3" data-testid="active-members">
                       {Object.keys(metricas?.projetosPorResponsavel || {}).length}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Membros ativos
+                      Produtividade
                     </p>
                   </CardContent>
                 </Card>
@@ -204,6 +239,27 @@ export default function Metrics() {
                         <YAxis />
                         <Tooltip />
                         <Bar dataKey="projetos" fill="#82ca9d" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                {/* Videos by Client */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Vídeos por Cliente</CardTitle>
+                    <CardDescription>
+                      Distribuição de projetos por cliente
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={clienteData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Bar dataKey="videos" fill="#8884d8" />
                       </BarChart>
                     </ResponsiveContainer>
                   </CardContent>
