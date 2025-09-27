@@ -7,6 +7,7 @@ import {
   Plus, 
   User, 
   FileText, 
+  Database,
   Settings,
   LogOut,
   Moon,
@@ -52,6 +53,11 @@ export function Sidebar() {
       name: "Relatórios",
       href: "/relatorios",
       icon: FileText,
+    },
+    {
+      name: "Banco de Dados",
+      href: "/banco-de-dados",
+      icon: Database,
     },
   ];
 
