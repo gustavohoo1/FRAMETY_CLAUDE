@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { insertProjetoSchema, type InsertProjeto, type User, type TipoVideo } from "@shared/schema";
+import { insertProjetoSchema, type InsertProjeto, type User, type TipoVideo, type Cliente } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
@@ -38,6 +38,10 @@ export function ProjectForm({ onSuccess, initialData, isEdit, projectId }: Proje
     queryKey: ["/api/tipos-video"],
   });
 
+  const { data: clientes = [] } = useQuery<Cliente[]>({
+    queryKey: ["/api/clientes"],
+  });
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -46,7 +50,7 @@ export function ProjectForm({ onSuccess, initialData, isEdit, projectId }: Proje
       tipoVideoId: initialData?.tipoVideoId || "",
       responsavelId: initialData?.responsavelId || "",
       prioridade: initialData?.prioridade || "Média",
-      cliente: initialData?.cliente || "",
+      clienteId: initialData?.clienteId || "",
       tags: initialData?.tags?.join(", ") || "",
       dataPrevistaEntrega: initialData?.dataPrevistaEntrega 
         ? new Date(initialData.dataPrevistaEntrega).toISOString().split('T')[0]
@@ -278,17 +282,24 @@ export function ProjectForm({ onSuccess, initialData, isEdit, projectId }: Proje
 
             <FormField
               control={form.control}
-              name="cliente"
+              name="clienteId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Cliente</FormLabel>
-                  <FormControl>
-                    <Input
-                      placeholder="Nome do cliente"
-                      {...field}
-                      data-testid="input-cliente"
-                    />
-                  </FormControl>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger data-testid="select-cliente">
+                        <SelectValue placeholder="Selecione um cliente" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {clientes.map((cliente) => (
+                        <SelectItem key={cliente.id} value={cliente.id} data-testid={`option-cliente-${cliente.id}`}>
+                          {cliente.nome}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
