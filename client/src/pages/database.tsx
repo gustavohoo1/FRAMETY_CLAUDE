@@ -44,6 +44,8 @@ export default function DatabasePage() {
       email: "",
       telefone: "",
       empresa: "",
+      backgroundColor: "#3b82f6",
+      textColor: "#ffffff",
     },
   });
 
@@ -588,6 +590,77 @@ export default function DatabasePage() {
                     </FormItem>
                   )}
                 />
+                
+                <FormField
+                  control={createForm.control}
+                  name="backgroundColor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cor de Fundo</FormLabel>
+                      <FormControl>
+                        <div className="flex items-center space-x-2">
+                          <Input 
+                            type="color"
+                            {...field}
+                            className="w-16 h-10 p-1 border rounded"
+                            data-testid="input-create-bg-color"
+                          />
+                          <Input 
+                            type="text"
+                            {...field}
+                            placeholder="#3b82f6"
+                            className="flex-1"
+                            data-testid="input-create-bg-text"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={createForm.control}
+                  name="textColor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cor do Texto</FormLabel>
+                      <FormControl>
+                        <div className="flex items-center space-x-2">
+                          <Input 
+                            type="color"
+                            {...field}
+                            className="w-16 h-10 p-1 border rounded"
+                            data-testid="input-create-text-color"
+                          />
+                          <Input 
+                            type="text"
+                            {...field}
+                            placeholder="#ffffff"
+                            className="flex-1"
+                            data-testid="input-create-text-text"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Preview */}
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium">Preview:</span>
+                  <div 
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    style={{ 
+                      backgroundColor: createForm.watch("backgroundColor") || "#3b82f6", 
+                      color: createForm.watch("textColor") || "#ffffff" 
+                    }}
+                    data-testid="client-preview"
+                  >
+                    {createForm.watch("nome") || "Nome do Cliente"}
+                  </div>
+                </div>
               </div>
               
               <DialogFooter>
