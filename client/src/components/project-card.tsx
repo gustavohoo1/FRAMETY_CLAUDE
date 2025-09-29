@@ -199,18 +199,30 @@ export function ProjectCard({
             >
               {projeto.prioridade}
             </Badge>
-
-            {/* Data pequena repetida */}
-            {formattedDate && (
-              <span className="text-xs text-muted-foreground truncate">
-                {formattedDate}
-              </span>
-            )}
           </div>
 
-          {/* Direita: Badge Comentários + Botões + Avatar */}
+          {/* Direita: Avatar + Badge Comentários + 3 Botões */}
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            {/* Badge de Comentários */}
+            {/* Avatar do responsável */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Avatar className="h-9 w-9 cursor-pointer ring-2 ring-primary/20 flex-shrink-0" data-testid="project-avatar">
+                    {projeto.responsavel?.fotoUrl && (
+                      <AvatarImage src={projeto.responsavel.fotoUrl} alt={projeto.responsavel.nome} />
+                    )}
+                    <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">
+                      {projeto.responsavel?.nome?.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{projeto.responsavel?.nome}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+
+            {/* Badge de Comentários (círculo com número) */}
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -289,25 +301,6 @@ export function ProjectCard({
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Marcar como aprovado</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
-            {/* Avatar do responsável */}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Avatar className="h-9 w-9 cursor-pointer ring-2 ring-primary/20 flex-shrink-0" data-testid="project-avatar">
-                    {projeto.responsavel?.fotoUrl && (
-                      <AvatarImage src={projeto.responsavel.fotoUrl} alt={projeto.responsavel.nome} />
-                    )}
-                    <AvatarFallback className="bg-primary text-primary-foreground text-xs font-bold">
-                      {projeto.responsavel?.nome?.substring(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{projeto.responsavel?.nome}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
