@@ -144,7 +144,8 @@ export class DatabaseStorage implements IStorage {
       .from(projetos)
       .leftJoin(tiposDeVideo, eq(projetos.tipoVideoId, tiposDeVideo.id))
       .leftJoin(users, eq(projetos.responsavelId, users.id))
-      .leftJoin(clientes, eq(projetos.clienteId, clientes.id));
+      .leftJoin(clientes, eq(projetos.clienteId, clientes.id))
+      .leftJoin(empreendimentos, eq(projetos.empreendimentoId, empreendimentos.id));
 
     const conditions = [];
 
@@ -181,6 +182,7 @@ export class DatabaseStorage implements IStorage {
       tipoVideo: row.tipos_de_video!,
       responsavel: row.users!,
       cliente: row.clientes || undefined,
+      empreendimento: row.empreendimentos || undefined,
     }));
   }
 
@@ -191,6 +193,7 @@ export class DatabaseStorage implements IStorage {
       .leftJoin(tiposDeVideo, eq(projetos.tipoVideoId, tiposDeVideo.id))
       .leftJoin(users, eq(projetos.responsavelId, users.id))
       .leftJoin(clientes, eq(projetos.clienteId, clientes.id))
+      .leftJoin(empreendimentos, eq(projetos.empreendimentoId, empreendimentos.id))
       .where(eq(projetos.id, id));
 
     if (!result) return undefined;
@@ -200,6 +203,7 @@ export class DatabaseStorage implements IStorage {
       tipoVideo: result.tipos_de_video!,
       responsavel: result.users!,
       cliente: result.clientes || undefined,
+      empreendimento: result.empreendimentos || undefined,
     };
   }
 

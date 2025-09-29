@@ -78,6 +78,7 @@ export const projetos = pgTable("projetos", {
   dataAprovacao: timestamp("data_aprovacao"),
   prioridade: priorityEnum("prioridade").notNull().default("Média"),
   clienteId: varchar("cliente_id").references(() => clientes.id),
+  empreendimentoId: varchar("empreendimento_id").references(() => empreendimentos.id),
   anexos: text("anexos").array().default([]),
   linkYoutube: text("link_youtube"),
 });
@@ -126,6 +127,10 @@ export const projetosRelations = relations(projetos, ({ one, many }) => ({
   cliente: one(clientes, {
     fields: [projetos.clienteId],
     references: [clientes.id],
+  }),
+  empreendimento: one(empreendimentos, {
+    fields: [projetos.empreendimentoId],
+    references: [empreendimentos.id],
   }),
   logsDeStatus: many(logsDeStatus),
 }));
@@ -219,6 +224,7 @@ export type ProjetoWithRelations = Projeto & {
   tipoVideo: TipoVideo;
   responsavel: User;
   cliente?: Cliente;
+  empreendimento?: Empreendimento;
 };
 
 export type EmpreendimentoWithRelations = Empreendimento & {
