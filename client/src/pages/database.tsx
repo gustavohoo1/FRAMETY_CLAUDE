@@ -27,6 +27,7 @@ export default function DatabasePage() {
   
   // Category modals
   const [createCategoryDialogOpen, setCreateCategoryDialogOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<TipoVideo | null>(null);
 
   const { data: clientes = [], isLoading } = useQuery<Cliente[]>({
     queryKey: ["/api/clientes"],
@@ -198,6 +199,11 @@ export default function DatabasePage() {
       telefone: cliente.telefone || "",
       empresa: cliente.empresa || "",
     });
+  };
+
+  const handleEditCategory = (categoria: TipoVideo) => {
+    setEditingCategory(categoria);
+    // Note: We'll need to create an edit form for categories
   };
 
   const handleDelete = (id: string) => {
@@ -460,17 +466,26 @@ export default function DatabasePage() {
                             </TableCell>
                             <TableCell className="text-right">
                               {user?.papel === "Admin" && (
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="text-destructive hover:text-destructive"
-                                      data-testid={`delete-category-${tipo.id}`}
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </AlertDialogTrigger>
+                                <div className="flex justify-end space-x-2">
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleEditCategory(tipo)}
+                                    data-testid={`button-edit-category-${tipo.id}`}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  
+                                  <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                      <Button
+                                        variant="destructive"
+                                        size="sm"
+                                        data-testid={`delete-category-${tipo.id}`}
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+                                    </AlertDialogTrigger>
                                   <AlertDialogContent>
                                     <AlertDialogHeader>
                                       <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
@@ -490,6 +505,7 @@ export default function DatabasePage() {
                                     </AlertDialogFooter>
                                   </AlertDialogContent>
                                 </AlertDialog>
+                                </div>
                               )}
                             </TableCell>
                           </TableRow>
