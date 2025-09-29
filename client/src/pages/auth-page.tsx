@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Video, Users, BarChart, CheckCircle } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { insertUserSchema } from "@shared/schema";
+import frametyLogo from "@assets/Framety - PNG -  01_1759177448673.png";
 
 const loginSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -73,11 +74,12 @@ export default function AuthPage() {
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="w-full max-w-md space-y-6">
           <div className="text-center space-y-2">
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <Video className="w-6 h-6 text-primary-foreground" />
-              </div>
-              <h1 className="text-3xl font-bold text-foreground">FRAMETY</h1>
+            <div className="flex items-center justify-center">
+              <img 
+                src={frametyLogo} 
+                alt="Framety" 
+                className="h-12 w-auto"
+              />
             </div>
             <p className="text-muted-foreground">
               Sistema de gestão de projetos de vídeo

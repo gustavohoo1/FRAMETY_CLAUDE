@@ -20,6 +20,7 @@ import { useTheme } from "@/components/ui/theme-provider";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useSidebar } from "@/contexts/sidebar-context";
+import frametyLogo from "@assets/Framety - PNG -  01_1759177448673.png";
 
 export function Sidebar() {
   const [location] = useLocation();
@@ -91,11 +92,12 @@ export function Sidebar() {
             </div>
           ) : (
             <div className="flex items-center">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <Video className="w-4 h-4 text-primary-foreground" />
-                </div>
-                <h1 className="text-xl font-bold text-foreground">FRAMETY</h1>
+              <div className="flex items-center">
+                <img 
+                  src={frametyLogo} 
+                  alt="Framety" 
+                  className="h-8 w-auto"
+                />
               </div>
               <Button
                 variant="ghost"
