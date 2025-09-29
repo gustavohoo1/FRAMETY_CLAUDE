@@ -273,10 +273,11 @@ export function ProjectDetailsDrawer({
           </div>
         </DrawerHeader>
 
-        <ScrollArea className="flex-1 px-6 py-4 h-[calc(90vh-80px)]">
-          <Form {...form}>
-            <div className="space-y-4">
-              {/* Cliente - Empreendimento - Categoria */}
+        <div className="flex-1 h-[calc(90vh-120px)] overflow-y-auto px-6 py-4">
+          <ScrollArea className="h-full">
+            <Form {...form}>
+              <div className="space-y-4">
+                {/* Cliente - Empreendimento - Categoria */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
@@ -909,9 +910,10 @@ export function ProjectDetailsDrawer({
                   </div>
                 </div>
               </div>
-            </div>
-          </Form>
-        </ScrollArea>
+              </div>
+            </Form>
+          </ScrollArea>
+        </div>
       </DrawerContent>
     </Drawer>
   );
