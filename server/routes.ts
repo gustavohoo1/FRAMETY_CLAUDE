@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
-import { insertProjetoSchema, insertLogStatusSchema, insertClienteSchema, insertEmpreendimentoSchema, insertTagSchema, insertTipoVideoSchema } from "@shared/schema";
+import { insertProjetoSchema, insertLogStatusSchema, insertClienteSchema, insertEmpreendimentoSchema, insertTagSchema, insertTipoVideoSchema, insertComentarioSchema } from "@shared/schema";
 
 function requireAuth(req: any, res: any, next: any) {
   if (!req.isAuthenticated()) {
@@ -363,6 +363,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const logs = await storage.getLogsByProjeto(req.params.id);
       res.json(logs);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Comentários routes
+  app.get("/api/projetos/:id/comentarios", requireAuth, async (req, res, next) => {
+    try {
+      const comentarios = await storage.getComentariosByProjeto(req.params.id);
+      res.json(comentarios);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/comentarios", requireAuth, async (req, res, next) => {
+    try {
+      const comentarioData = insertComentarioSchema.parse({
+        ...req.body,
+        autorId: req.user.id
+      });
+      const comentario = await storage.createComentario(comentarioData);
+      res.status(201).json(comentario);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.put("/api/comentarios/:id", requireAuth, async (req, res, next) => {
+    try {
+      const comentarioData = insertComentarioSchema.partial().parse(req.body);
+      const updatedComentario = await storage.updateComentario(req.params.id, comentarioData);
+      res.json(updatedComentario);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/comentarios/:id", requireAuth, async (req, res, next) => {
+    try {
+      await storage.deleteComentario(req.params.id);
+      res.sendStatus(204);
     } catch (error) {
       next(error);
     }

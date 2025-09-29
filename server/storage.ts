@@ -6,6 +6,7 @@ import {
   logsDeStatus,
   clientes,
   empreendimentos,
+  comentarios,
   type User, 
   type InsertUser, 
   type Projeto,
@@ -21,7 +22,10 @@ import {
   type Empreendimento,
   type InsertEmpreendimento,
   type EmpreendimentoWithRelations,
-  type ProjetoWithRelations
+  type ProjetoWithRelations,
+  type Comentario,
+  type InsertComentario,
+  type ComentarioWithRelations
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, like, desc, asc, sql } from "drizzle-orm";
@@ -82,6 +86,12 @@ export interface IStorage {
   // Logs de Status
   createLogStatus(log: InsertLogStatus): Promise<LogStatus>;
   getLogsByProjeto(projetoId: string): Promise<LogStatus[]>;
+  
+  // Comentários
+  getComentariosByProjeto(projetoId: string): Promise<ComentarioWithRelations[]>;
+  createComentario(comentario: InsertComentario): Promise<Comentario>;
+  updateComentario(id: string, comentario: Partial<InsertComentario>): Promise<Comentario>;
+  deleteComentario(id: string): Promise<void>;
   
   // Métricas
   getMetricas(): Promise<{
@@ -410,6 +420,41 @@ export class DatabaseStorage implements IStorage {
       .from(logsDeStatus)
       .where(eq(logsDeStatus.projetoId, projetoId))
       .orderBy(desc(logsDeStatus.dataHora));
+  }
+
+  async getComentariosByProjeto(projetoId: string): Promise<ComentarioWithRelations[]> {
+    const results = await db
+      .select()
+      .from(comentarios)
+      .leftJoin(users, eq(comentarios.autorId, users.id))
+      .where(eq(comentarios.projetoId, projetoId))
+      .orderBy(desc(comentarios.createdAt));
+
+    return results.map(row => ({
+      ...row.comentarios,
+      autor: row.users!,
+    }));
+  }
+
+  async createComentario(comentario: InsertComentario): Promise<Comentario> {
+    const [newComentario] = await db
+      .insert(comentarios)
+      .values(comentario)
+      .returning();
+    return newComentario;
+  }
+
+  async updateComentario(id: string, comentario: Partial<InsertComentario>): Promise<Comentario> {
+    const [updatedComentario] = await db
+      .update(comentarios)
+      .set(comentario)
+      .where(eq(comentarios.id, id))
+      .returning();
+    return updatedComentario;
+  }
+
+  async deleteComentario(id: string): Promise<void> {
+    await db.delete(comentarios).where(eq(comentarios.id, id));
   }
 
   async getMetricas() {
