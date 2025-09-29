@@ -1,14 +1,44 @@
+/*
+ * MOBILE OPTIMIZATION UPDATE:
+ * - Added custom breakpoints for better mobile support:
+ *   - xs: 360px (small phones like Galaxy S8)
+ *   - sm: 640px (larger phones in landscape)
+ *   - md: 768px (tablets)
+ *   - lg: 1024px (small laptops)
+ *   - xl: 1280px (desktops)
+ *   - 2xl: 1536px (large screens)
+ * - Added fluid spacing scale
+ * - Container padding configured to be responsive
+ */
 import type { Config } from "tailwindcss";
 
 export default {
   darkMode: ["class"],
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
+    screens: {
+      'xs': '360px',
+      'sm': '640px',
+      'md': '768px',
+      'lg': '1024px',
+      'xl': '1280px',
+      '2xl': '1536px',
+    },
     extend: {
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      spacing: {
+        'safe-top': 'env(safe-area-inset-top)',
+        'safe-bottom': 'env(safe-area-inset-bottom)',
+        'safe-left': 'env(safe-area-inset-left)',
+        'safe-right': 'env(safe-area-inset-right)',
+      },
+      maxWidth: {
+        '8xl': '88rem',
+        '9xl': '96rem',
       },
       colors: {
         background: "var(--background)",
