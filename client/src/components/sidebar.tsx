@@ -13,7 +13,7 @@ import {
   Moon,
   Sun,
   Menu,
-  X
+  ChevronLeft
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { useTheme } from "@/components/ui/theme-provider";
@@ -76,7 +76,7 @@ export function Sidebar() {
   return (
     <div className={`hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 transition-all duration-300 ${isCollapsed ? 'lg:w-16' : 'lg:w-64'}`}>
       <div className="flex flex-col flex-grow bg-card border-r border-border pt-5 pb-4 overflow-y-auto">
-        <div className={`flex items-center flex-shrink-0 ${isCollapsed ? 'px-3 justify-center' : 'px-6'}`}>
+        <div className={`flex items-center flex-shrink-0 ${isCollapsed ? 'px-4 justify-center' : 'px-6'}`}>
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
               <Video className="w-4 h-4 text-primary-foreground" />
@@ -90,12 +90,12 @@ export function Sidebar() {
             className={`ml-auto h-8 w-8 p-0 ${isCollapsed ? 'ml-0' : ''}`}
             data-testid="sidebar-toggle"
           >
-            {isCollapsed ? <Menu className="h-4 w-4" /> : <X className="h-4 w-4" />}
+            {isCollapsed ? <Menu className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
           </Button>
         </div>
         
         <div className="mt-8 flex-grow flex flex-col">
-          <nav className={`flex-1 ${isCollapsed ? 'px-2' : 'px-4'} space-y-2`} data-testid="navigation">
+          <nav className={`flex-1 ${isCollapsed ? 'px-3' : 'px-4'} space-y-2`} data-testid="navigation">
             {navigation.map((item) => {
               const isActive = location === item.href || (item.href === "/dashboard" && location === "/");
               return (
@@ -108,7 +108,7 @@ export function Sidebar() {
                       ? "bg-primary text-primary-foreground" 
                       : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                     }
-                    ${isCollapsed ? 'justify-center' : ''}
+                    ${isCollapsed ? 'justify-center px-2' : ''}
                   `}
                   data-testid={`nav-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
                   title={isCollapsed ? item.name : undefined}
@@ -121,7 +121,7 @@ export function Sidebar() {
           </nav>
         </div>
         
-        <div className={`flex-shrink-0 border-t border-border pt-4 ${isCollapsed ? 'px-2' : 'px-4'}`}>
+        <div className={`flex-shrink-0 border-t border-border pt-4 ${isCollapsed ? 'px-3' : 'px-4'}`}>
           <div className={`flex items-center mb-4 ${isCollapsed ? 'flex-col space-y-2' : 'justify-between'}`}>
             <Button
               variant="ghost"
