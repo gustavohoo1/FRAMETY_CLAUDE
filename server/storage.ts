@@ -149,14 +149,6 @@ export class DatabaseStorage implements IStorage {
     prioridade?: string;
     search?: string;
   }): Promise<ProjetoWithRelations[]> {
-    let query = db
-      .select()
-      .from(projetos)
-      .leftJoin(tiposDeVideo, eq(projetos.tipoVideoId, tiposDeVideo.id))
-      .leftJoin(users, eq(projetos.responsavelId, users.id))
-      .leftJoin(clientes, eq(projetos.clienteId, clientes.id))
-      .leftJoin(empreendimentos, eq(projetos.empreendimentoId, empreendimentos.id));
-
     const conditions = [];
 
     if (filters?.status) {
@@ -181,11 +173,28 @@ export class DatabaseStorage implements IStorage {
       );
     }
 
+    let query = db
+      .select()
+      .from(projetos)
+      .leftJoin(tiposDeVideo, eq(projetos.tipoVideoId, tiposDeVideo.id))
+      .leftJoin(users, eq(projetos.responsavelId, users.id))
+      .leftJoin(clientes, eq(projetos.clienteId, clientes.id))
+      .leftJoin(empreendimentos, eq(projetos.empreendimentoId, empreendimentos.id))
+      .orderBy(desc(projetos.dataCriacao));
+
     if (conditions.length > 0) {
-      query = query.where(and(...conditions));
+      query = db
+        .select()
+        .from(projetos)
+        .leftJoin(tiposDeVideo, eq(projetos.tipoVideoId, tiposDeVideo.id))
+        .leftJoin(users, eq(projetos.responsavelId, users.id))
+        .leftJoin(clientes, eq(projetos.clienteId, clientes.id))
+        .leftJoin(empreendimentos, eq(projetos.empreendimentoId, empreendimentos.id))
+        .where(and(...conditions))
+        .orderBy(desc(projetos.dataCriacao));
     }
 
-    const result = await query.orderBy(desc(projetos.dataCriacao));
+    const result = await query;
     
     return result.map(row => ({
       ...row.projetos,

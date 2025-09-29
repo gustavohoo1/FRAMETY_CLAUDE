@@ -382,7 +382,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const comentarioData = insertComentarioSchema.parse({
         ...req.body,
-        autorId: req.user.id
+        autorId: req.user?.id
       });
       const comentario = await storage.createComentario(comentarioData);
       res.status(201).json(comentario);
