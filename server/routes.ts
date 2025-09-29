@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
-import { insertProjetoSchema, insertLogStatusSchema, insertClienteSchema } from "@shared/schema";
+import { insertProjetoSchema, insertLogStatusSchema, insertClienteSchema, insertTagSchema, insertTipoVideoSchema } from "@shared/schema";
 
 function requireAuth(req: any, res: any, next: any) {
   if (!req.isAuthenticated()) {
@@ -157,11 +157,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/tipos-video", requireAuth, requireRole(["Admin"]), async (req, res, next) => {
+    try {
+      const tipoData = insertTipoVideoSchema.parse(req.body);
+      const tipo = await storage.createTipoVideo(tipoData);
+      res.status(201).json(tipo);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.put("/api/tipos-video/:id", requireAuth, requireRole(["Admin"]), async (req, res, next) => {
+    try {
+      const tipoData = insertTipoVideoSchema.parse(req.body);
+      const updatedTipo = await storage.updateTipoVideo(req.params.id, tipoData);
+      res.json(updatedTipo);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/tipos-video/:id", requireAuth, requireRole(["Admin"]), async (req, res, next) => {
+    try {
+      await storage.deleteTipoVideo(req.params.id);
+      res.sendStatus(204);
+    } catch (error) {
+      next(error);
+    }
+  });
+
   // Tags routes
   app.get("/api/tags", requireAuth, async (req, res, next) => {
     try {
       const tags = await storage.getTags();
       res.json(tags);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/tags", requireAuth, requireRole(["Admin"]), async (req, res, next) => {
+    try {
+      const tagData = insertTagSchema.parse(req.body);
+      const tag = await storage.createTag(tagData);
+      res.status(201).json(tag);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.put("/api/tags/:id", requireAuth, requireRole(["Admin"]), async (req, res, next) => {
+    try {
+      const tagData = insertTagSchema.parse(req.body);
+      const updatedTag = await storage.updateTag(req.params.id, tagData);
+      res.json(updatedTag);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/tags/:id", requireAuth, requireRole(["Admin"]), async (req, res, next) => {
+    try {
+      await storage.deleteTag(req.params.id);
+      res.sendStatus(204);
     } catch (error) {
       next(error);
     }

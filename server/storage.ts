@@ -52,10 +52,14 @@ export interface IStorage {
   // Tipos de Video
   getTiposDeVideo(): Promise<TipoVideo[]>;
   createTipoVideo(tipo: InsertTipoVideo): Promise<TipoVideo>;
+  updateTipoVideo(id: string, tipo: Partial<InsertTipoVideo>): Promise<TipoVideo>;
+  deleteTipoVideo(id: string): Promise<void>;
   
   // Tags
   getTags(): Promise<Tag[]>;
   createTag(tag: InsertTag): Promise<Tag>;
+  updateTag(id: string, tag: Partial<InsertTag>): Promise<Tag>;
+  deleteTag(id: string): Promise<void>;
   
   // Clientes
   getClientes(): Promise<Cliente[]>;
@@ -225,6 +229,19 @@ export class DatabaseStorage implements IStorage {
     return newTipo;
   }
 
+  async updateTipoVideo(id: string, tipo: Partial<InsertTipoVideo>): Promise<TipoVideo> {
+    const [updatedTipo] = await db
+      .update(tiposDeVideo)
+      .set(tipo)
+      .where(eq(tiposDeVideo.id, id))
+      .returning();
+    return updatedTipo;
+  }
+
+  async deleteTipoVideo(id: string): Promise<void> {
+    await db.delete(tiposDeVideo).where(eq(tiposDeVideo.id, id));
+  }
+
   async getTags(): Promise<Tag[]> {
     return await db.select().from(tags).orderBy(asc(tags.nome));
   }
@@ -235,6 +252,19 @@ export class DatabaseStorage implements IStorage {
       .values(tag)
       .returning();
     return newTag;
+  }
+
+  async updateTag(id: string, tag: Partial<InsertTag>): Promise<Tag> {
+    const [updatedTag] = await db
+      .update(tags)
+      .set(tag)
+      .where(eq(tags.id, id))
+      .returning();
+    return updatedTag;
+  }
+
+  async deleteTag(id: string): Promise<void> {
+    await db.delete(tags).where(eq(tags.id, id));
   }
 
   async getClientes(): Promise<Cliente[]> {
