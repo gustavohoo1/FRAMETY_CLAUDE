@@ -5,7 +5,7 @@ import { z } from "zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { X, Edit2, Save, MessageCircle, Calendar, Clock, Link as LinkIcon, User, Building2, Tag as TagIcon, AlertCircle } from "lucide-react";
+import { X, Edit2, Save, MessageCircle, Calendar, Clock, Link as LinkIcon, User, Building2, Tag as TagIcon, AlertCircle, Trash2 } from "lucide-react";
 
 import {
   Drawer,
@@ -162,6 +162,25 @@ export function ProjectDetailsDrawer({
     },
   });
 
+  // Mutation para deletar comentário
+  const deleteCommentMutation = useMutation({
+    mutationFn: async (comentarioId: string) => {
+      await apiRequest("DELETE", `/api/comentarios/${comentarioId}`);
+    },
+    onSuccess: () => {
+      refetchComentarios();
+      toast({
+        title: "Comentário removido!",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Erro ao remover comentário",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleSave = () => {
     form.handleSubmit((data) => {
       // Filter out empty strings and convert types appropriately
@@ -204,6 +223,12 @@ export function ProjectDetailsDrawer({
         texto: newComment.trim(),
         anexos: [],
       });
+    }
+  };
+
+  const handleDeleteComment = (comentarioId: string) => {
+    if (window.confirm("Tem certeza que deseja excluir este comentário?")) {
+      deleteCommentMutation.mutate(comentarioId);
     }
   };
 
@@ -867,11 +892,25 @@ export function ProjectDetailsDrawer({
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="font-semibold text-sm">{comentario.autor.nome}</span>
-                              <span className="text-xs text-gray-500">
-                                {format(new Date(comentario.createdAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
-                              </span>
+                            <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-sm">{comentario.autor.nome}</span>
+                                <span className="text-xs text-gray-500">
+                                  {format(new Date(comentario.createdAt), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
+                                </span>
+                              </div>
+                              {user?.papel === "Admin" && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                                  onClick={() => handleDeleteComment(comentario.id)}
+                                  disabled={deleteCommentMutation.isPending}
+                                  data-testid={`button-delete-comment-${comentario.id}`}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              )}
                             </div>
                             <p className="text-sm text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
                               {comentario.texto}
