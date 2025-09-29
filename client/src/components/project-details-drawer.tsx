@@ -273,7 +273,7 @@ export function ProjectDetailsDrawer({
           </div>
         </DrawerHeader>
 
-        <ScrollArea className="flex-1 px-6 py-4">
+        <ScrollArea className="flex-1 px-6 py-4 h-[calc(90vh-80px)]">
           <Form {...form}>
             <div className="space-y-4">
               {/* Cliente - Empreendimento - Categoria */}
