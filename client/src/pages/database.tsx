@@ -9,10 +9,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Plus, Edit, Trash2, Database, Building2, Tag, Video } from "lucide-react";
+import { Plus, Edit, Trash2, Database, Building2, Video } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertClienteSchema, insertTagSchema, insertTipoVideoSchema, type Cliente, type InsertCliente, type Tag as TagType, type InsertTag, type TipoVideo, type InsertTipoVideo } from "@shared/schema";
+import { insertClienteSchema, insertTipoVideoSchema, type Cliente, type InsertCliente, type TipoVideo, type InsertTipoVideo } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useSidebarLayout } from "@/hooks/use-sidebar-layout";
@@ -25,17 +25,13 @@ export default function DatabasePage() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
   
-  // Tag/Category modals
-  const [createTagDialogOpen, setCreateTagDialogOpen] = useState(false);
+  // Category modals
   const [createCategoryDialogOpen, setCreateCategoryDialogOpen] = useState(false);
 
   const { data: clientes = [], isLoading } = useQuery<Cliente[]>({
     queryKey: ["/api/clientes"],
   });
 
-  const { data: tags = [] } = useQuery<TagType[]>({
-    queryKey: ["/api/tags"],
-  });
 
   const { data: categorias = [] } = useQuery<TipoVideo[]>({
     queryKey: ["/api/tipos-video"],
@@ -61,14 +57,6 @@ export default function DatabasePage() {
     },
   });
 
-  const tagForm = useForm<InsertTag>({
-    resolver: zodResolver(insertTagSchema),
-    defaultValues: {
-      nome: "",
-      backgroundColor: "#10b981",
-      textColor: "#ffffff",
-    },
-  });
 
   const categoryForm = useForm<InsertTipoVideo>({
     resolver: zodResolver(insertTipoVideoSchema),
@@ -145,49 +133,6 @@ export default function DatabasePage() {
     },
   });
 
-  // Tag mutations
-  const createTagMutation = useMutation({
-    mutationFn: async (data: InsertTag) => {
-      const response = await apiRequest("POST", "/api/tags", data);
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/tags"] });
-      setCreateTagDialogOpen(false);
-      tagForm.reset();
-      toast({
-        title: "Tag criada",
-        description: "Tag adicionada ao banco de dados com sucesso.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Erro ao criar tag",
-        description: error.message || "Ocorreu um erro inesperado.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const deleteTagMutation = useMutation({
-    mutationFn: async (id: string) => {
-      await apiRequest("DELETE", `/api/tags/${id}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/tags"] });
-      toast({
-        title: "Tag excluída",
-        description: "Tag removida do banco de dados com sucesso.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Erro ao excluir tag",
-        description: error.message || "Ocorreu um erro inesperado.",
-        variant: "destructive",
-      });
-    },
-  });
 
   // Category mutations
   const createCategoryMutation = useMutation({
@@ -257,17 +202,9 @@ export default function DatabasePage() {
     deleteMutation.mutate(id);
   };
 
-  // Tag/Category handlers
-  const onCreateTagSubmit = (data: InsertTag) => {
-    createTagMutation.mutate(data);
-  };
-
+  // Category handlers
   const onCreateCategorySubmit = (data: InsertTipoVideo) => {
     createCategoryMutation.mutate(data);
-  };
-
-  const handleDeleteTag = (id: string) => {
-    deleteTagMutation.mutate(id);
   };
 
   const handleDeleteCategory = (id: string) => {
@@ -313,11 +250,6 @@ export default function DatabasePage() {
               
               {user?.papel === "Admin" && (
                 <>
-                  <Button variant="outline" data-testid="button-new-tag" onClick={() => setCreateTagDialogOpen(true)}>
-                    <Tag className="h-4 w-4 mr-2" />
-                    Nova Tag
-                  </Button>
-                  
                   <Button variant="outline" data-testid="button-new-category" onClick={() => setCreateCategoryDialogOpen(true)}>
                     <Video className="h-4 w-4 mr-2" />
                     Nova Categoria
@@ -477,91 +409,6 @@ export default function DatabasePage() {
                 </CardContent>
               </Card>
 
-              {/* Tags Table */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Tags Cadastradas</CardTitle>
-                  <CardDescription>
-                    Gerencie todas as tags do sistema
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {tags.length > 0 ? (
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Nome</TableHead>
-                          <TableHead>Preview</TableHead>
-                          <TableHead className="text-right">Ações</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {tags.map((tag) => (
-                          <TableRow key={tag.id}>
-                            <TableCell className="font-medium">{tag.nome}</TableCell>
-                            <TableCell>
-                              <div 
-                                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                                style={{ 
-                                  backgroundColor: tag.backgroundColor, 
-                                  color: tag.textColor 
-                                }}
-                                data-testid={`tag-preview-${tag.id}`}
-                              >
-                                {tag.nome}
-                              </div>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              {user?.papel === "Admin" && (
-                                <AlertDialog>
-                                  <AlertDialogTrigger asChild>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      className="text-destructive hover:text-destructive"
-                                      data-testid={`delete-tag-${tag.id}`}
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </AlertDialogTrigger>
-                                  <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                      <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-                                      <AlertDialogDescription>
-                                        Tem certeza que deseja remover a tag "{tag.nome}"? Esta ação não pode ser desfeita.
-                                      </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                      <AlertDialogAction
-                                        onClick={() => handleDeleteTag(tag.id)}
-                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                        data-testid={`confirm-delete-tag-${tag.id}`}
-                                      >
-                                        Remover
-                                      </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                  </AlertDialogContent>
-                                </AlertDialog>
-                              )}
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  ) : (
-                    <div className="text-center py-8" data-testid="empty-tags">
-                      <Tag className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-muted-foreground">
-                        Nenhuma tag cadastrada ainda.
-                      </p>
-                      <p className="text-sm text-muted-foreground mt-2">
-                        Clique em "Nova Tag" para adicionar a primeira tag.
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
 
               {/* Categories Table */}
               <Card>
@@ -861,122 +708,6 @@ export default function DatabasePage() {
         </DialogContent>
       </Dialog>
 
-      {/* Create Tag Dialog */}
-      <Dialog open={createTagDialogOpen} onOpenChange={setCreateTagDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <Form {...tagForm}>
-            <form onSubmit={tagForm.handleSubmit(onCreateTagSubmit)}>
-              <DialogHeader>
-                <DialogTitle>Adicionar Tag</DialogTitle>
-                <DialogDescription>
-                  Crie uma nova tag com cores personalizadas.
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="grid gap-4 py-4">
-                <FormField
-                  control={tagForm.control}
-                  name="nome"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nome da Tag *</FormLabel>
-                      <FormControl>
-                        <Input 
-                          placeholder="Digite o nome da tag" 
-                          {...field} 
-                          data-testid="input-tag-name"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={tagForm.control}
-                  name="backgroundColor"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cor de Fundo</FormLabel>
-                      <FormControl>
-                        <div className="flex items-center space-x-2">
-                          <Input 
-                            type="color"
-                            {...field}
-                            className="w-16 h-10 p-1 border rounded"
-                            data-testid="input-tag-bg-color"
-                          />
-                          <Input 
-                            type="text"
-                            {...field}
-                            placeholder="#FF0000"
-                            className="flex-1"
-                            data-testid="input-tag-bg-text"
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={tagForm.control}
-                  name="textColor"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Cor do Texto</FormLabel>
-                      <FormControl>
-                        <div className="flex items-center space-x-2">
-                          <Input 
-                            type="color"
-                            {...field}
-                            className="w-16 h-10 p-1 border rounded"
-                            data-testid="input-tag-text-color"
-                          />
-                          <Input 
-                            type="text"
-                            {...field}
-                            placeholder="#FFFFFF"
-                            className="flex-1"
-                            data-testid="input-tag-text-text"
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Preview */}
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium">Preview:</span>
-                  <div 
-                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                    style={{ 
-                      backgroundColor: tagForm.watch("backgroundColor") || "#3b82f6", 
-                      color: tagForm.watch("textColor") || "#ffffff" 
-                    }}
-                    data-testid="tag-preview"
-                  >
-                    {tagForm.watch("nome") || "Nome da Tag"}
-                  </div>
-                </div>
-              </div>
-              
-              <DialogFooter>
-                <Button 
-                  type="submit" 
-                  disabled={createTagMutation.isPending}
-                  data-testid="button-tag-submit"
-                >
-                  {createTagMutation.isPending ? "Criando..." : "Criar Tag"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
 
       {/* Create Category Dialog */}
       <Dialog open={createCategoryDialogOpen} onOpenChange={setCreateCategoryDialogOpen}>
