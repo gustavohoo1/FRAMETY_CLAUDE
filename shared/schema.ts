@@ -10,6 +10,8 @@ export const projectStatusEnum = pgEnum("project_status", [
   "Roteiro", 
   "Captação",
   "Edição",
+  "Entrega",
+  "Outros",
   "Revisão",
   "Aguardando Aprovação",
   "Aprovado",
@@ -81,6 +83,18 @@ export const projetos = pgTable("projetos", {
   empreendimentoId: varchar("empreendimento_id").references(() => empreendimentos.id),
   anexos: text("anexos").array().default([]),
   linkYoutube: text("link_youtube"),
+  // Novos campos
+  duracao: integer("duracao"), // minutagem
+  formato: text("formato"), // texto simples
+  captacao: boolean("captacao").default(false),
+  roteiro: boolean("roteiro").default(false),
+  locucao: boolean("locucao").default(false),
+  dataInterna: timestamp("data_interna"),
+  dataMeeting: timestamp("data_meeting"),
+  linkFrameIo: text("link_frame_io"),
+  caminho: text("caminho"),
+  referencias: text("referencias"), // links simples, várias linhas
+  informacoesAdicionais: text("informacoes_adicionais"), // texto livre
 });
 
 export const logsDeStatus = pgTable("logs_de_status", {
@@ -92,10 +106,20 @@ export const logsDeStatus = pgTable("logs_de_status", {
   dataHora: timestamp("data_hora").defaultNow().notNull(),
 });
 
+export const comentarios = pgTable("comentarios", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  projetoId: varchar("projeto_id").references(() => projetos.id).notNull(),
+  autorId: varchar("autor_id").references(() => users.id).notNull(),
+  texto: text("texto").notNull(),
+  anexos: text("anexos").array().default([]), // URLs das imagens
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   projetosResponsavel: many(projetos, { relationName: "responsavel" }),
   logsDeStatus: many(logsDeStatus),
+  comentarios: many(comentarios),
 }));
 
 export const tiposDeVideoRelations = relations(tiposDeVideo, ({ many }) => ({
@@ -133,6 +157,7 @@ export const projetosRelations = relations(projetos, ({ one, many }) => ({
     references: [empreendimentos.id],
   }),
   logsDeStatus: many(logsDeStatus),
+  comentarios: many(comentarios),
 }));
 
 export const logsDeStatusRelations = relations(logsDeStatus, ({ one }) => ({
@@ -142,6 +167,17 @@ export const logsDeStatusRelations = relations(logsDeStatus, ({ one }) => ({
   }),
   alteradoPor: one(users, {
     fields: [logsDeStatus.alteradoPorId],
+    references: [users.id],
+  }),
+}));
+
+export const comentariosRelations = relations(comentarios, ({ one }) => ({
+  projeto: one(projetos, {
+    fields: [comentarios.projetoId],
+    references: [projetos.id],
+  }),
+  autor: one(users, {
+    fields: [comentarios.autorId],
     references: [users.id],
   }),
 }));
@@ -195,11 +231,20 @@ export const insertProjetoSchema = createInsertSchema(projetos).omit({
   dataAprovacao: true,
 }).extend({
   dataPrevistaEntrega: z.string().optional().transform((val) => val ? new Date(val) : undefined),
+  dataInterna: z.string().optional().transform((val) => val ? new Date(val) : undefined),
+  dataMeeting: z.string().optional().transform((val) => val ? new Date(val) : undefined),
+  linkFrameIo: z.string().url().optional().or(z.literal("")),
+  linkYoutube: z.string().url().optional().or(z.literal("")),
 });
 
 export const insertLogStatusSchema = createInsertSchema(logsDeStatus).omit({
   id: true,
   dataHora: true,
+});
+
+export const insertComentarioSchema = createInsertSchema(comentarios).omit({
+  id: true,
+  createdAt: true,
 });
 
 // Types
@@ -218,6 +263,8 @@ export type Projeto = typeof projetos.$inferSelect;
 export type InsertProjeto = z.infer<typeof insertProjetoSchema>;
 export type LogStatus = typeof logsDeStatus.$inferSelect;
 export type InsertLogStatus = z.infer<typeof insertLogStatusSchema>;
+export type Comentario = typeof comentarios.$inferSelect;
+export type InsertComentario = z.infer<typeof insertComentarioSchema>;
 
 // Extended types with relations
 export type ProjetoWithRelations = Projeto & {
@@ -229,4 +276,8 @@ export type ProjetoWithRelations = Projeto & {
 
 export type EmpreendimentoWithRelations = Empreendimento & {
   cliente: Cliente;
+};
+
+export type ComentarioWithRelations = Comentario & {
+  autor: User;
 };
