@@ -335,113 +335,6 @@ export default function DatabasePage() {
               
               {/* Stats Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Form {...createForm}>
-                  <form onSubmit={createForm.handleSubmit(onCreateSubmit)}>
-                    <DialogHeader>
-                      <DialogTitle>Adicionar Cliente</DialogTitle>
-                      <DialogDescription>
-                        Preencha as informações do novo cliente.
-                      </DialogDescription>
-                    </DialogHeader>
-                    
-                    <div className="grid gap-4 py-4">
-                      <FormField
-                        control={createForm.control}
-                        name="nome"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Nome *</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="Nome do cliente" 
-                                {...field} 
-                                data-testid="input-create-nome"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={createForm.control}
-                        name="email"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                              <Input 
-                                type="email"
-                                placeholder="email@cliente.com" 
-                                {...field} 
-                                data-testid="input-create-email"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={createForm.control}
-                        name="telefone"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Telefone</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="(11) 99999-9999" 
-                                {...field} 
-                                data-testid="input-create-telefone"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={createForm.control}
-                        name="empresa"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Empresa</FormLabel>
-                            <FormControl>
-                              <Input 
-                                placeholder="Nome da empresa" 
-                                {...field} 
-                                data-testid="input-create-empresa"
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    
-                    <DialogFooter>
-                      <Button 
-                        type="submit" 
-                        disabled={createMutation.isPending}
-                        data-testid="button-create-submit"
-                      >
-                        {createMutation.isPending ? "Criando..." : "Criar Cliente"}
-                      </Button>
-                    </DialogFooter>
-                  </form>
-                </Form>
-              </DialogContent>
-            </Dialog>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <main className="flex-1 relative overflow-y-auto focus:outline-none">
-          <div className="py-6">
-            <div className="max-w-7xl mx-auto px-6 space-y-6">
-              
-              {/* Stats Card */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">Total de Clientes</CardTitle>
@@ -588,6 +481,110 @@ export default function DatabasePage() {
         </main>
       </div>
 
+      {/* Create Client Dialog */}
+      <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <Form {...createForm}>
+            <form onSubmit={createForm.handleSubmit(onCreateSubmit)}>
+              <DialogHeader>
+                <DialogTitle>Adicionar Cliente</DialogTitle>
+                <DialogDescription>
+                  Preencha as informações do novo cliente.
+                </DialogDescription>
+              </DialogHeader>
+              
+              <div className="grid gap-4 py-4">
+                <FormField
+                  control={createForm.control}
+                  name="nome"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome *</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Nome do cliente" 
+                          {...field} 
+                          data-testid="input-create-nome"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={createForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input 
+                          type="email"
+                          placeholder="email@cliente.com" 
+                          {...field}
+                          value={field.value || ""}
+                          data-testid="input-create-email"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={createForm.control}
+                  name="telefone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Telefone</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="(11) 99999-9999" 
+                          {...field}
+                          value={field.value || ""}
+                          data-testid="input-create-telefone"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={createForm.control}
+                  name="empresa"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Empresa</FormLabel>
+                      <FormControl>
+                        <Input 
+                          placeholder="Nome da empresa" 
+                          {...field}
+                          value={field.value || ""}
+                          data-testid="input-create-empresa"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+              
+              <DialogFooter>
+                <Button 
+                  type="submit" 
+                  disabled={createMutation.isPending}
+                  data-testid="button-create-submit"
+                >
+                  {createMutation.isPending ? "Criando..." : "Criar Cliente"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
       {/* Edit Dialog */}
       <Dialog open={!!editingCliente} onOpenChange={() => setEditingCliente(null)}>
         <DialogContent className="sm:max-w-[425px]">
@@ -629,7 +626,8 @@ export default function DatabasePage() {
                         <Input 
                           type="email"
                           placeholder="email@cliente.com" 
-                          {...field} 
+                          {...field}
+                          value={field.value || ""}
                           data-testid="input-edit-email"
                         />
                       </FormControl>
@@ -647,7 +645,8 @@ export default function DatabasePage() {
                       <FormControl>
                         <Input 
                           placeholder="(11) 99999-9999" 
-                          {...field} 
+                          {...field}
+                          value={field.value || ""}
                           data-testid="input-edit-telefone"
                         />
                       </FormControl>
@@ -665,7 +664,8 @@ export default function DatabasePage() {
                       <FormControl>
                         <Input 
                           placeholder="Nome da empresa" 
-                          {...field} 
+                          {...field}
+                          value={field.value || ""}
                           data-testid="input-edit-empresa"
                         />
                       </FormControl>
