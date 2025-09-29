@@ -332,46 +332,44 @@ export function UserProfileDrawer({ isCollapsed }: UserProfileDrawerProps) {
               <TabsContent value="users" className="flex-1 overflow-y-auto px-6 mt-4 pb-6">
                 <div className="space-y-6 pr-2">
                   {!editingUserId ? (
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       {allUsers?.map((u) => (
                         <div
                           key={u.id}
-                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-accent/50 transition-colors"
+                          className="flex items-center gap-3 p-3 border rounded-lg hover:bg-accent/50 transition-colors"
                           onMouseEnter={() => setHoveredUserId(u.id)}
                           onMouseLeave={() => setHoveredUserId(null)}
                         >
-                          <div className="flex items-center space-x-3 flex-1">
-                            <Avatar className="h-12 w-12">
-                              {u.fotoUrl ? (
-                                <AvatarImage src={u.fotoUrl} alt={u.nome} />
-                              ) : null}
-                              <AvatarFallback className="text-sm font-semibold">
-                                {u.nome.substring(0, 2).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-foreground truncate">{u.nome}</p>
-                              <p className="text-sm text-muted-foreground truncate">{u.email}</p>
-                              <div className="flex items-center mt-1">
-                                <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                                  u.papel === "Admin" ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200" :
-                                  u.papel === "Gestor" ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200" :
-                                  "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
-                                }`}>
-                                  {u.papel}
-                                </span>
-                              </div>
-                            </div>
+                          <Avatar className="h-11 w-11 flex-shrink-0">
+                            {u.fotoUrl ? (
+                              <AvatarImage src={u.fotoUrl} alt={u.nome} />
+                            ) : null}
+                            <AvatarFallback className="text-sm font-semibold">
+                              {u.nome.substring(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-sm text-foreground truncate leading-tight">{u.nome}</p>
+                            <p className="text-xs text-muted-foreground truncate mt-0.5">{u.email}</p>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium mt-1 ${
+                              u.papel === "Admin" ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200" :
+                              u.papel === "Gestor" ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200" :
+                              "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
+                            }`}>
+                              {u.papel}
+                            </span>
                           </div>
-                          <div className="flex items-center space-x-2">
+                          
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => handleEditUser(u)}
                               data-testid={`button-edit-user-${u.id}`}
-                              className="h-9 w-9 p-0"
+                              className="h-8 w-8 p-0"
                             >
-                              <Pencil className="h-4 w-4" />
+                              <Pencil className="h-3.5 w-3.5" />
                             </Button>
                             {u.id !== user?.id && (
                               <Button
@@ -380,9 +378,9 @@ export function UserProfileDrawer({ isCollapsed }: UserProfileDrawerProps) {
                                 onClick={() => deleteUserMutation.mutate(u.id)}
                                 disabled={deleteUserMutation.isPending}
                                 data-testid={`button-delete-user-${u.id}`}
-                                className="h-9 w-9 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                                className="h-8 w-8 p-0 hover:bg-destructive hover:text-destructive-foreground"
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-3.5 w-3.5" />
                               </Button>
                             )}
                           </div>
