@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
-import { insertProjetoSchema, insertLogStatusSchema, insertClienteSchema, insertTagSchema, insertTipoVideoSchema } from "@shared/schema";
+import { insertProjetoSchema, insertLogStatusSchema, insertClienteSchema, insertEmpreendimentoSchema, insertTagSchema, insertTipoVideoSchema } from "@shared/schema";
 
 function requireAuth(req: any, res: any, next: any) {
   if (!req.isAuthenticated()) {
@@ -290,6 +290,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof Error && error.message.includes("projeto(s) associado(s)")) {
         return res.status(400).json({ message: error.message });
       }
+      if (error instanceof Error && error.message.includes("empreendimento(s) associado(s)")) {
+        return res.status(400).json({ message: error.message });
+      }
+      next(error);
+    }
+  });
+
+  // Empreendimentos routes
+  app.get("/api/empreendimentos", requireAuth, async (req, res, next) => {
+    try {
+      const empreendimentos = await storage.getEmpreendimentos();
+      res.json(empreendimentos);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/empreendimentos/:id", requireAuth, async (req, res, next) => {
+    try {
+      const empreendimento = await storage.getEmpreendimento(req.params.id);
+      if (!empreendimento) {
+        return res.status(404).json({ message: "Empreendimento não encontrado" });
+      }
+      res.json(empreendimento);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/empreendimentos", requireAuth, async (req, res, next) => {
+    try {
+      const empreendimentoData = insertEmpreendimentoSchema.parse(req.body);
+      const empreendimento = await storage.createEmpreendimento(empreendimentoData);
+      res.status(201).json(empreendimento);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.put("/api/empreendimentos/:id", requireAuth, async (req, res, next) => {
+    try {
+      const empreendimento = await storage.getEmpreendimento(req.params.id);
+      if (!empreendimento) {
+        return res.status(404).json({ message: "Empreendimento não encontrado" });
+      }
+
+      const empreendimentoData = insertEmpreendimentoSchema.parse(req.body);
+      const updatedEmpreendimento = await storage.updateEmpreendimento(req.params.id, empreendimentoData);
+      res.json(updatedEmpreendimento);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/empreendimentos/:id", requireAuth, async (req, res, next) => {
+    try {
+      const empreendimento = await storage.getEmpreendimento(req.params.id);
+      if (!empreendimento) {
+        return res.status(404).json({ message: "Empreendimento não encontrado" });
+      }
+
+      await storage.deleteEmpreendimento(req.params.id);
+      res.sendStatus(204);
+    } catch (error) {
       next(error);
     }
   });
