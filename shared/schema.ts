@@ -58,6 +58,7 @@ export const clientes = pgTable("clientes", {
 export const empreendimentos = pgTable("empreendimentos", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   nome: text("nome").notNull(),
+  descricao: text("descricao"),
   clienteId: varchar("cliente_id").references(() => clientes.id).notNull(),
   backgroundColor: text("background_color").notNull().default("#3b82f6"),
   textColor: text("text_color").notNull().default("#ffffff"),

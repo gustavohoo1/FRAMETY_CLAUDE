@@ -9,10 +9,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { Plus, Edit, Trash2, Database, Building2, Video } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertClienteSchema, insertTipoVideoSchema, type Cliente, type InsertCliente, type TipoVideo, type InsertTipoVideo } from "@shared/schema";
+import { insertClienteSchema, insertTipoVideoSchema, insertEmpreendimentoSchema, type Cliente, type InsertCliente, type TipoVideo, type InsertTipoVideo, type Empreendimento, type InsertEmpreendimento, type EmpreendimentoWithRelations } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useSidebarLayout } from "@/hooks/use-sidebar-layout";
@@ -28,6 +30,10 @@ export default function DatabasePage() {
   // Category modals
   const [createCategoryDialogOpen, setCreateCategoryDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<TipoVideo | null>(null);
+  
+  // Empreendimento modals
+  const [createEmpreendimentoDialogOpen, setCreateEmpreendimentoDialogOpen] = useState(false);
+  const [editingEmpreendimento, setEditingEmpreendimento] = useState<EmpreendimentoWithRelations | null>(null);
 
   const { data: clientes = [], isLoading } = useQuery<Cliente[]>({
     queryKey: ["/api/clientes"],
@@ -36,6 +42,10 @@ export default function DatabasePage() {
 
   const { data: categorias = [] } = useQuery<TipoVideo[]>({
     queryKey: ["/api/tipos-video"],
+  });
+
+  const { data: empreendimentos = [] } = useQuery<EmpreendimentoWithRelations[]>({
+    queryKey: ["/api/empreendimentos"],
   });
 
   const createForm = useForm<InsertCliente>({
@@ -76,6 +86,29 @@ export default function DatabasePage() {
     resolver: zodResolver(insertTipoVideoSchema),
     defaultValues: {
       nome: "",
+      backgroundColor: "#3b82f6",
+      textColor: "#ffffff",
+    },
+  });
+
+  // Empreendimentos forms
+  const empreendimentoForm = useForm<InsertEmpreendimento>({
+    resolver: zodResolver(insertEmpreendimentoSchema),
+    defaultValues: {
+      nome: "",
+      descricao: "",
+      clienteId: "",
+      backgroundColor: "#3b82f6",
+      textColor: "#ffffff",
+    },
+  });
+
+  const editEmpreendimentoForm = useForm<InsertEmpreendimento>({
+    resolver: zodResolver(insertEmpreendimentoSchema),
+    defaultValues: {
+      nome: "",
+      descricao: "",
+      clienteId: "",
       backgroundColor: "#3b82f6",
       textColor: "#ffffff",
     },
@@ -215,6 +248,73 @@ export default function DatabasePage() {
     },
   });
 
+  // Empreendimentos mutations
+  const createEmpreendimentoMutation = useMutation({
+    mutationFn: async (data: InsertEmpreendimento) => {
+      const response = await apiRequest("POST", "/api/empreendimentos", data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/empreendimentos"] });
+      setCreateEmpreendimentoDialogOpen(false);
+      empreendimentoForm.reset();
+      toast({
+        title: "Empreendimento criado",
+        description: "Empreendimento adicionado ao banco de dados com sucesso.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao criar empreendimento",
+        description: error.message || "Ocorreu um erro inesperado.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateEmpreendimentoMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string; data: InsertEmpreendimento }) => {
+      const response = await apiRequest("PUT", `/api/empreendimentos/${id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/empreendimentos"] });
+      setEditingEmpreendimento(null);
+      editEmpreendimentoForm.reset();
+      toast({
+        title: "Empreendimento atualizado",
+        description: "Informações do empreendimento atualizadas com sucesso.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao atualizar empreendimento",
+        description: error.message || "Ocorreu um erro inesperado.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteEmpreendimentoMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/empreendimentos/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/empreendimentos"] });
+      toast({
+        title: "Empreendimento excluído",
+        description: "Empreendimento removido do banco de dados com sucesso.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Erro ao excluir empreendimento",
+        description: error.message || "Ocorreu um erro inesperado.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const onCreateSubmit = (data: InsertCliente) => {
     createMutation.mutate(data);
   };
@@ -265,6 +365,32 @@ export default function DatabasePage() {
     deleteCategoryMutation.mutate(id);
   };
 
+  // Empreendimentos handlers
+  const handleEditEmpreendimento = (empreendimento: EmpreendimentoWithRelations) => {
+    setEditingEmpreendimento(empreendimento);
+    editEmpreendimentoForm.reset({
+      nome: empreendimento.nome,
+      descricao: empreendimento.descricao || "",
+      clienteId: empreendimento.clienteId,
+      backgroundColor: empreendimento.backgroundColor,
+      textColor: empreendimento.textColor,
+    });
+  };
+
+  const onCreateEmpreendimentoSubmit = (data: InsertEmpreendimento) => {
+    createEmpreendimentoMutation.mutate(data);
+  };
+
+  const onEditEmpreendimentoSubmit = (data: InsertEmpreendimento) => {
+    if (editingEmpreendimento) {
+      updateEmpreendimentoMutation.mutate({ id: editingEmpreendimento.id, data });
+    }
+  };
+
+  const handleDeleteEmpreendimento = (id: string) => {
+    deleteEmpreendimentoMutation.mutate(id);
+  };
+
   if (isLoading) {
     return (
       <div className="flex h-screen overflow-hidden">
@@ -308,6 +434,10 @@ export default function DatabasePage() {
                     <Video className="h-4 w-4 mr-2" />
                     Nova Categoria
                   </Button>
+                  <Button variant="outline" data-testid="button-new-empreendimento" onClick={() => setCreateEmpreendimentoDialogOpen(true)}>
+                    <Building2 className="h-4 w-4 mr-2" />
+                    Novo Empreendimento
+                  </Button>
                 </>
               )}
             </div>
@@ -338,15 +468,15 @@ export default function DatabasePage() {
                 
                 <Card>
                   <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">Com Email</CardTitle>
+                    <CardTitle className="text-sm font-medium">Total de Empreendimentos</CardTitle>
                     <Building2 className="h-4 w-4 text-muted-foreground" />
                   </CardHeader>
                   <CardContent>
-                    <div className="text-2xl font-bold" data-testid="clients-with-email">
-                      {clientes.filter(c => c.email).length}
+                    <div className="text-2xl font-bold" data-testid="total-empreendimentos">
+                      {empreendimentos.length}
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Contatos disponíveis
+                      Empreendimentos cadastrados
                     </p>
                   </CardContent>
                 </Card>
@@ -475,6 +605,105 @@ export default function DatabasePage() {
                 </CardContent>
               </Card>
 
+              {/* Empreendimentos Table */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Empreendimentos Cadastrados</CardTitle>
+                  <CardDescription>
+                    Gerencie todos os empreendimentos do sistema
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {empreendimentos.length > 0 ? (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Nome</TableHead>
+                          <TableHead>Cliente</TableHead>
+                          <TableHead>Descrição</TableHead>
+                          <TableHead>Preview</TableHead>
+                          <TableHead className="text-right">Ações</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {empreendimentos.map((empreendimento) => (
+                          <TableRow key={empreendimento.id}>
+                            <TableCell className="font-medium">{empreendimento.nome}</TableCell>
+                            <TableCell>{empreendimento.cliente?.nome}</TableCell>
+                            <TableCell className="max-w-xs truncate">
+                              {empreendimento.descricao || "—"}
+                            </TableCell>
+                            <TableCell>
+                              <div 
+                                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                style={{ 
+                                  backgroundColor: empreendimento.backgroundColor, 
+                                  color: empreendimento.textColor 
+                                }}
+                                data-testid={`empreendimento-preview-${empreendimento.id}`}
+                              >
+                                {empreendimento.nome}
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-right">
+                              <div className="flex items-center justify-end space-x-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEditEmpreendimento(empreendimento)}
+                                  data-testid={`edit-empreendimento-${empreendimento.id}`}
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <AlertDialog>
+                                  <AlertDialogTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      data-testid={`delete-empreendimento-${empreendimento.id}`}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </AlertDialogTrigger>
+                                  <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                      <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                                      <AlertDialogDescription>
+                                        Tem certeza de que deseja remover o empreendimento "{empreendimento.nome}"? 
+                                        Esta ação não pode ser desfeita.
+                                      </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                      <AlertDialogAction
+                                        onClick={() => handleDeleteEmpreendimento(empreendimento.id)}
+                                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                        data-testid={`confirm-delete-empreendimento-${empreendimento.id}`}
+                                      >
+                                        Remover
+                                      </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                  </AlertDialogContent>
+                                </AlertDialog>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  ) : (
+                    <div className="text-center py-8" data-testid="empty-empreendimentos">
+                      <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">
+                        Nenhum empreendimento cadastrado ainda.
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Clique em "Novo Empreendimento" para adicionar o primeiro empreendimento.
+                      </p>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
               {/* Categories Table */}
               <Card>
@@ -1154,6 +1383,318 @@ export default function DatabasePage() {
                   data-testid="button-edit-category-submit"
                 >
                   {updateCategoryMutation.isPending ? "Atualizando..." : "Atualizar Categoria"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Empreendimento Dialog */}
+      <Dialog open={createEmpreendimentoDialogOpen} onOpenChange={setCreateEmpreendimentoDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Criar Novo Empreendimento</DialogTitle>
+            <DialogDescription>
+              Adicione um novo empreendimento ao banco de dados.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...empreendimentoForm}>
+            <form onSubmit={empreendimentoForm.handleSubmit(onCreateEmpreendimentoSubmit)} className="space-y-6">
+              <div className="grid grid-cols-1 gap-4">
+                <FormField
+                  control={empreendimentoForm.control}
+                  name="nome"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome do Empreendimento</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Digite o nome do empreendimento" {...field} data-testid="input-empreendimento-nome" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={empreendimentoForm.control}
+                  name="clienteId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cliente</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-empreendimento-cliente">
+                            <SelectValue placeholder="Selecione um cliente" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {clientes.map((cliente) => (
+                            <SelectItem key={cliente.id} value={cliente.id}>
+                              {cliente.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={empreendimentoForm.control}
+                  name="descricao"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descrição (Opcional)</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Digite uma descrição para o empreendimento"
+                          {...field}
+                          data-testid="input-empreendimento-descricao"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={empreendimentoForm.control}
+                  name="backgroundColor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cor de Fundo</FormLabel>
+                      <FormControl>
+                        <div className="flex items-center space-x-2">
+                          <Input 
+                            type="color"
+                            {...field}
+                            className="w-16 h-10 p-1 border rounded"
+                            data-testid="input-empreendimento-bg-color"
+                          />
+                          <Input 
+                            type="text"
+                            {...field}
+                            placeholder="#3b82f6"
+                            className="flex-1"
+                            data-testid="input-empreendimento-bg-text"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={empreendimentoForm.control}
+                  name="textColor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cor do Texto</FormLabel>
+                      <FormControl>
+                        <div className="flex items-center space-x-2">
+                          <Input 
+                            type="color"
+                            {...field}
+                            className="w-16 h-10 p-1 border rounded"
+                            data-testid="input-empreendimento-text-color"
+                          />
+                          <Input 
+                            type="text"
+                            {...field}
+                            placeholder="#ffffff"
+                            className="flex-1"
+                            data-testid="input-empreendimento-text-text"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Preview */}
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium">Preview:</span>
+                  <div 
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    style={{ 
+                      backgroundColor: empreendimentoForm.watch("backgroundColor") || "#3b82f6", 
+                      color: empreendimentoForm.watch("textColor") || "#ffffff" 
+                    }}
+                    data-testid="empreendimento-preview"
+                  >
+                    {empreendimentoForm.watch("nome") || "Nome do Empreendimento"}
+                  </div>
+                </div>
+              </div>
+              
+              <DialogFooter>
+                <Button 
+                  type="submit" 
+                  disabled={createEmpreendimentoMutation.isPending}
+                  data-testid="button-create-empreendimento-submit"
+                >
+                  {createEmpreendimentoMutation.isPending ? "Criando..." : "Criar Empreendimento"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Empreendimento Dialog */}
+      <Dialog open={!!editingEmpreendimento} onOpenChange={() => setEditingEmpreendimento(null)}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Editar Empreendimento</DialogTitle>
+            <DialogDescription>
+              Atualize as informações do empreendimento.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...editEmpreendimentoForm}>
+            <form onSubmit={editEmpreendimentoForm.handleSubmit(onEditEmpreendimentoSubmit)} className="space-y-6">
+              <div className="grid grid-cols-1 gap-4">
+                <FormField
+                  control={editEmpreendimentoForm.control}
+                  name="nome"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nome do Empreendimento</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Digite o nome do empreendimento" {...field} data-testid="input-edit-empreendimento-nome" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={editEmpreendimentoForm.control}
+                  name="clienteId"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cliente</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger data-testid="select-edit-empreendimento-cliente">
+                            <SelectValue placeholder="Selecione um cliente" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {clientes.map((cliente) => (
+                            <SelectItem key={cliente.id} value={cliente.id}>
+                              {cliente.nome}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={editEmpreendimentoForm.control}
+                  name="descricao"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Descrição (Opcional)</FormLabel>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Digite uma descrição para o empreendimento"
+                          {...field}
+                          data-testid="input-edit-empreendimento-descricao"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={editEmpreendimentoForm.control}
+                  name="backgroundColor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cor de Fundo</FormLabel>
+                      <FormControl>
+                        <div className="flex items-center space-x-2">
+                          <Input 
+                            type="color"
+                            {...field}
+                            className="w-16 h-10 p-1 border rounded"
+                            data-testid="input-edit-empreendimento-bg-color"
+                          />
+                          <Input 
+                            type="text"
+                            {...field}
+                            placeholder="#3b82f6"
+                            className="flex-1"
+                            data-testid="input-edit-empreendimento-bg-text"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={editEmpreendimentoForm.control}
+                  name="textColor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cor do Texto</FormLabel>
+                      <FormControl>
+                        <div className="flex items-center space-x-2">
+                          <Input 
+                            type="color"
+                            {...field}
+                            className="w-16 h-10 p-1 border rounded"
+                            data-testid="input-edit-empreendimento-text-color"
+                          />
+                          <Input 
+                            type="text"
+                            {...field}
+                            placeholder="#ffffff"
+                            className="flex-1"
+                            data-testid="input-edit-empreendimento-text-text"
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {/* Preview */}
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium">Preview:</span>
+                  <div 
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                    style={{ 
+                      backgroundColor: editEmpreendimentoForm.watch("backgroundColor") || "#3b82f6", 
+                      color: editEmpreendimentoForm.watch("textColor") || "#ffffff" 
+                    }}
+                    data-testid="empreendimento-edit-preview"
+                  >
+                    {editEmpreendimentoForm.watch("nome") || "Nome do Empreendimento"}
+                  </div>
+                </div>
+              </div>
+              
+              <DialogFooter>
+                <Button 
+                  type="submit" 
+                  disabled={updateEmpreendimentoMutation.isPending}
+                  data-testid="button-edit-empreendimento-submit"
+                >
+                  {updateEmpreendimentoMutation.isPending ? "Atualizando..." : "Atualizar Empreendimento"}
                 </Button>
               </DialogFooter>
             </form>
