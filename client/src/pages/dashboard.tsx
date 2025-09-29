@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Search, Filter, Plus } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
+import { useSidebarLayout } from "@/hooks/use-sidebar-layout";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -15,6 +16,7 @@ import { useToast } from "@/hooks/use-toast";
 export default function Dashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { mainContentClass } = useSidebarLayout();
   const [filters, setFilters] = useState({
     responsavelId: "all",
     tipoVideoId: "all",
@@ -75,7 +77,7 @@ export default function Dashboard() {
     <div className="flex h-screen overflow-hidden">
       <Sidebar />
       
-      <div className="lg:pl-64 flex flex-col flex-1 overflow-hidden">
+      <div className={`${mainContentClass} flex flex-col flex-1 overflow-hidden transition-all duration-300`}>
         {/* Header */}
         <div className="relative z-10 flex-shrink-0 flex h-16 bg-card border-b border-border shadow-sm">
           <div className="flex-1 px-6 flex justify-between items-center">

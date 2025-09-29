@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useSidebarLayout } from "@/hooks/use-sidebar-layout";
 import { Sidebar } from "@/components/sidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +9,7 @@ import { TrendingUp, Users, Video, AlertTriangle } from "lucide-react";
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 export default function Metrics() {
+  const { mainContentClass } = useSidebarLayout();
   const { data: metricas, isLoading } = useQuery<any>({
     queryKey: ["/api/metricas"],
     refetchInterval: 30000, // Atualiza a cada 30 segundos
@@ -20,7 +22,7 @@ export default function Metrics() {
     return (
       <div className="flex h-screen overflow-hidden">
         <Sidebar />
-        <div className="lg:pl-64 flex flex-col flex-1">
+        <div className={`${mainContentClass} flex flex-col flex-1 transition-all duration-300`}>
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[1, 2, 3, 4].map((i) => (
@@ -61,7 +63,7 @@ export default function Metrics() {
     <div className="flex h-screen overflow-hidden">
       <Sidebar />
       
-      <div className="lg:pl-64 flex flex-col flex-1 overflow-hidden">
+      <div className={`${mainContentClass} flex flex-col flex-1 overflow-hidden transition-all duration-300`}>
         {/* Header */}
         <div className="relative z-10 flex-shrink-0 flex h-16 bg-card border-b border-border shadow-sm">
           <div className="flex-1 px-6 flex items-center">
