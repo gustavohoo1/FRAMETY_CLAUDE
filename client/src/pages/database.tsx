@@ -329,6 +329,7 @@ export default function DatabasePage() {
                       <TableHeader>
                         <TableRow>
                           <TableHead>Nome</TableHead>
+                          <TableHead>Preview</TableHead>
                           <TableHead>Email</TableHead>
                           <TableHead>Telefone</TableHead>
                           <TableHead>Empresa</TableHead>
@@ -340,6 +341,17 @@ export default function DatabasePage() {
                           <TableRow key={cliente.id} data-testid={`row-client-${cliente.id}`}>
                             <TableCell className="font-medium" data-testid={`text-nome-${cliente.id}`}>
                               {cliente.nome}
+                            </TableCell>
+                            <TableCell data-testid={`preview-client-${cliente.id}`}>
+                              <div 
+                                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                style={{ 
+                                  backgroundColor: cliente.backgroundColor || "#3b82f6", 
+                                  color: cliente.textColor || "#ffffff" 
+                                }}
+                              >
+                                {cliente.nome}
+                              </div>
                             </TableCell>
                             <TableCell data-testid={`text-email-${cliente.id}`}>
                               {cliente.email || "—"}
