@@ -54,9 +54,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         search: req.query.search as string,
       };
 
-      // Remove undefined values
+      // Remove undefined values and "all" values
       Object.keys(filters).forEach(key => {
-        if (!filters[key as keyof typeof filters]) {
+        const value = filters[key as keyof typeof filters];
+        if (!value || value === "all") {
           delete filters[key as keyof typeof filters];
         }
       });

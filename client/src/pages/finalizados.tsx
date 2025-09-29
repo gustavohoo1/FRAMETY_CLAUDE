@@ -14,10 +14,12 @@ import { ptBR } from "date-fns/locale";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { useSidebarLayout } from "@/hooks/use-sidebar-layout";
 
 export default function Finalizados() {
   const { toast } = useToast();
   const { user } = useAuth();
+  const { mainContentClass } = useSidebarLayout();
   const [editingProject, setEditingProject] = useState<ProjetoWithRelations | null>(null);
   const [youtubeLink, setYoutubeLink] = useState("");
 
@@ -89,7 +91,7 @@ export default function Finalizados() {
     return (
       <div className="flex h-screen overflow-hidden">
         <Sidebar />
-        <div className="lg:pl-64 flex flex-col flex-1">
+        <div className={`${mainContentClass} flex flex-col flex-1 transition-all duration-300`}>
           <div className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -110,7 +112,7 @@ export default function Finalizados() {
     <div className="flex h-screen overflow-hidden">
       <Sidebar />
       
-      <div className="lg:pl-64 flex flex-col flex-1 overflow-hidden">
+      <div className={`${mainContentClass} flex flex-col flex-1 overflow-hidden transition-all duration-300`}>
         {/* Header */}
         <div className="relative z-10 flex-shrink-0 flex h-16 bg-card border-b border-border shadow-sm">
           <div className="flex-1 px-6 flex justify-between items-center">
@@ -208,7 +210,7 @@ export default function Finalizados() {
 
                         {projeto.cliente && (
                           <div className="text-sm text-muted-foreground" data-testid="project-client">
-                            <strong>Cliente:</strong> {projeto.cliente}
+                            <strong>Cliente:</strong> {projeto.cliente.nome}
                           </div>
                         )}
 
