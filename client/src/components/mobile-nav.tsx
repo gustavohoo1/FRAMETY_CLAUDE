@@ -150,7 +150,7 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
                 </div>
               </div>
               <div className="mt-3">
-                <UserProfileDrawer>
+                <UserProfileDrawer isCollapsed={false}>
                   <Button 
                     variant="outline" 
                     size="sm" 
