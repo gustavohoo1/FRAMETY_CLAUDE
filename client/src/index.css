@@ -1,3 +1,11 @@
+/*
+ * MOBILE OPTIMIZATION UPDATE:
+ * - Added fluid typography using clamp() for responsive font sizes (360px to 1920px)
+ * - Added responsive spacing variables
+ * - Configured container max-width and padding
+ * - Enhanced viewport support for mobile devices
+ * - Typography scales automatically: mobile (14px base) to desktop (16px base)
+ */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
@@ -50,6 +58,22 @@
   --shadow-2xl: 0px 2px 0px 0px hsl(9, 75%, 61% / 0.00);
   --spacing: 0.25rem;
   --tracking-normal: 0em;
+  
+  /* Fluid Typography - Scales from mobile (360px) to desktop (1920px) */
+  --fluid-xs: clamp(0.75rem, 0.69rem + 0.29vw, 0.875rem);      /* 12px -> 14px */
+  --fluid-sm: clamp(0.875rem, 0.81rem + 0.29vw, 1rem);         /* 14px -> 16px */
+  --fluid-base: clamp(1rem, 0.93rem + 0.36vw, 1.125rem);       /* 16px -> 18px */
+  --fluid-md: clamp(1.125rem, 1.03rem + 0.43vw, 1.25rem);      /* 18px -> 20px */
+  --fluid-lg: clamp(1.25rem, 1.14rem + 0.57vw, 1.5rem);        /* 20px -> 24px */
+  --fluid-xl: clamp(1.5rem, 1.29rem + 1.07vw, 2rem);           /* 24px -> 32px */
+  --fluid-2xl: clamp(1.875rem, 1.54rem + 1.71vw, 2.625rem);    /* 30px -> 42px */
+  --fluid-3xl: clamp(2.25rem, 1.79rem + 2.36vw, 3.375rem);     /* 36px -> 54px */
+  --fluid-4xl: clamp(2.625rem, 1.96rem + 3.39vw, 4.25rem);     /* 42px -> 68px */
+  
+  /* Responsive Spacing - Adapts container and padding */
+  --container-padding: clamp(1rem, 2vw, 2rem);                  /* 16px -> 32px */
+  --section-spacing: clamp(2rem, 4vw, 4rem);                    /* 32px -> 64px */
+  --element-gap: clamp(0.5rem, 1vw, 1rem);                      /* 8px -> 16px */
 }
 
 .dark {
