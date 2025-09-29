@@ -96,7 +96,7 @@ export function Sidebar() {
                 <img 
                   src={frametyLogo} 
                   alt="Framety" 
-                  className="h-20 w-auto max-w-full"
+                  className="h-24 w-auto max-w-full object-contain"
                 />
               </div>
               <Button
