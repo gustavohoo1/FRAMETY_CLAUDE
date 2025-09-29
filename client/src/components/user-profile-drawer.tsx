@@ -209,22 +209,24 @@ export function UserProfileDrawer({ isCollapsed }: UserProfileDrawerProps) {
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent 
           side="left" 
-          className="w-[450px] sm:w-[600px] p-0 flex flex-col"
-          style={{ left: isCollapsed ? "80px" : "256px", bottom: "20px", top: "auto", height: "85vh" }}
+          className="w-[450px] sm:w-[600px] p-0 flex flex-col bg-background"
+          style={{ left: isCollapsed ? "80px" : "256px", bottom: "20px", top: "auto", height: "calc(85vh - 20px)", maxHeight: "calc(100vh - 40px)" }}
         >
-          <SheetHeader className="p-6 pb-4">
+          <SheetHeader className="p-6 pb-4 border-b">
             <SheetTitle>Configurações</SheetTitle>
           </SheetHeader>
 
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col px-6">
-            <TabsList className="grid w-full" style={{ gridTemplateColumns: user?.papel === "Admin" ? "1fr 1fr" : "1fr" }}>
-              <TabsTrigger value="profile" data-testid="tab-profile">Perfil</TabsTrigger>
-              {user?.papel === "Admin" && (
-                <TabsTrigger value="users" data-testid="tab-users">Usuários</TabsTrigger>
-              )}
-            </TabsList>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
+            <div className="px-6 pt-4">
+              <TabsList className="grid w-full" style={{ gridTemplateColumns: user?.papel === "Admin" ? "1fr 1fr" : "1fr" }}>
+                <TabsTrigger value="profile" data-testid="tab-profile">Perfil</TabsTrigger>
+                {user?.papel === "Admin" && (
+                  <TabsTrigger value="users" data-testid="tab-users">Usuários</TabsTrigger>
+                )}
+              </TabsList>
+            </div>
 
-            <TabsContent value="profile" className="flex-1 overflow-y-auto mt-4 pb-6">
+            <TabsContent value="profile" className="flex-1 overflow-y-auto px-6 mt-4 pb-6">
               <Form {...profileForm}>
                 <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)} className="space-y-4">
                   <div className="flex flex-col items-center space-y-4">
@@ -327,8 +329,8 @@ export function UserProfileDrawer({ isCollapsed }: UserProfileDrawerProps) {
             </TabsContent>
 
             {user?.papel === "Admin" && (
-              <TabsContent value="users" className="flex-1 overflow-y-auto mt-4 pb-6">
-                <div className="space-y-6">
+              <TabsContent value="users" className="flex-1 overflow-y-auto px-6 mt-4 pb-6">
+                <div className="space-y-6 pr-2">
                   {!editingUserId ? (
                     <div className="space-y-3">
                       {allUsers?.map((u) => (
