@@ -31,11 +31,17 @@ export const users = pgTable("users", {
 export const tiposDeVideo = pgTable("tipos_de_video", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   nome: text("nome").notNull().unique(),
+  backgroundColor: text("background_color").notNull().default("#3b82f6"),
+  textColor: text("text_color").notNull().default("#ffffff"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const tags = pgTable("tags", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   nome: text("nome").notNull().unique(),
+  backgroundColor: text("background_color").notNull().default("#10b981"),
+  textColor: text("text_color").notNull().default("#ffffff"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const clientes = pgTable("clientes", {
@@ -131,10 +137,18 @@ export const registerUserSchema = createInsertSchema(users).omit({
 
 export const insertTipoVideoSchema = createInsertSchema(tiposDeVideo).omit({
   id: true,
+  createdAt: true,
+}).extend({
+  backgroundColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Cor de fundo deve ser um código hexadecimal válido"),
+  textColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Cor do texto deve ser um código hexadecimal válido"),
 });
 
 export const insertTagSchema = createInsertSchema(tags).omit({
   id: true,
+  createdAt: true,
+}).extend({
+  backgroundColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Cor de fundo deve ser um código hexadecimal válido"),
+  textColor: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Cor do texto deve ser um código hexadecimal válido"),
 });
 
 export const insertClienteSchema = createInsertSchema(clientes).omit({
