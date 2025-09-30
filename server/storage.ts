@@ -272,11 +272,17 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteProjeto(id: string): Promise<void> {
-    // First delete all related status logs
-    await db.delete(logsDeStatus).where(eq(logsDeStatus.projetoId, id));
-    
-    // Then delete the project
-    await db.delete(projetos).where(eq(projetos.id, id));
+    // Use transaction to ensure atomic deletion (all-or-nothing)
+    await db.transaction(async (tx) => {
+      // First delete all related comments
+      await tx.delete(comentarios).where(eq(comentarios.projetoId, id));
+      
+      // Then delete all related status logs
+      await tx.delete(logsDeStatus).where(eq(logsDeStatus.projetoId, id));
+      
+      // Finally delete the project
+      await tx.delete(projetos).where(eq(projetos.id, id));
+    });
   }
 
   async getTiposDeVideo(): Promise<TipoVideo[]> {

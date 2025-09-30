@@ -1,6 +1,6 @@
 # Overview
 
-This is a modern video project management web application built with a React frontend, Express backend, Drizzle ORM, and PostgreSQL database. The system provides a complete Kanban-style interface for managing video production projects across different stages, from briefing to approval. It includes role-based authentication (Admin, Gestor/Manager, Membro/Member), comprehensive project tracking, metrics visualization, and reporting capabilities. The application supports drag-and-drop project management, automated status logging, and specialized views for different user roles.
+This is a modern video project management web application built with a React frontend, Express backend, Drizzle ORM, and PostgreSQL database. The system provides a complete Kanban-style interface for managing video production projects across different stages, from briefing to approval. It includes role-based authentication (Admin, Gestor/Manager, Membro/Member), comprehensive project tracking, metrics visualization, and reporting capabilities. The application supports drag-and-drop project management, automated status logging, specialized views for different user roles, and a fully responsive mobile-first design with custom navigation.
 
 # User Preferences
 
@@ -48,12 +48,27 @@ Preferred communication style: Simple, everyday language.
 - **Reporting**: Exportable reports with date range filtering
 - **YouTube Integration**: Link management for approved projects
 - **Responsive Design**: Mobile-friendly interface with dark/light theme support
+- **Mobile Navigation**: Custom sticky topbar with hamburger menu and slide-out drawer for mobile devices
+- **Safe Deletion**: Transactional deletion of projects with automatic cleanup of related comments and logs
 
 ## Data Flow Patterns
 - **Optimistic Updates**: Immediate UI updates with server reconciliation
 - **Real-time Sync**: Automatic query invalidation and refetching
 - **Form Validation**: Client and server-side validation with Zod schemas
 - **Error Handling**: Centralized error management with toast notifications
+- **Transactional Operations**: Database transactions for atomic multi-table operations (e.g., project deletion)
+
+## Recent Changes (September 2025)
+- **Mobile Navigation System**: Implemented custom mobile navigation with:
+  - Sticky topbar with blur effect and hamburger menu button
+  - Slide-out drawer menu with smooth transitions and overlay
+  - Profile display, theme toggle, and logout functionality
+  - Keyboard accessibility (ESC key closes drawer)
+  - Only visible on mobile/tablet (<768px), doesn't interfere with desktop sidebar
+- **Project Deletion Fix**: Resolved foreign key constraint violation when deleting projects with comments
+  - Added transactional deletion in correct order: comments → status logs → project
+  - Ensures atomic all-or-nothing deletion to prevent partial state
+  - Prevents orphaned data in the database
 
 # External Dependencies
 
