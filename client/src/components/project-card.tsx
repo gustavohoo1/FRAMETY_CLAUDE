@@ -63,8 +63,12 @@ export function ProjectCard({ projeto, isDragging, onEdit, onDelete }: ProjectCa
         </Badge>
 
         <h4 className="text-sm font-bold text-foreground line-clamp-1" data-testid="project-title">
-          {projeto.cliente?.nome || 'Cliente'} + {projeto.empreendimento?.nome || 'Empreendimento'}
+          {projeto.titulo}
         </h4>
+        
+        <p className="text-xs text-muted-foreground line-clamp-1" data-testid="project-client">
+          {projeto.cliente?.nome}
+        </p>
       </CardHeader>
       
       <CardContent className="space-y-1 pt-2 pb-2">        
