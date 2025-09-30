@@ -50,6 +50,7 @@ Preferred communication style: Simple, everyday language.
 - **Responsive Design**: Mobile-friendly interface with dark/light theme support
 - **Mobile Navigation**: Custom sticky topbar with hamburger menu and slide-out drawer for mobile devices
 - **Safe Deletion**: Transactional deletion of projects with automatic cleanup of related comments and logs
+- **User Management**: Soft delete for users to preserve historical data integrity
 
 ## Data Flow Patterns
 - **Optimistic Updates**: Immediate UI updates with server reconciliation
@@ -69,6 +70,11 @@ Preferred communication style: Simple, everyday language.
   - Added transactional deletion in correct order: comments → status logs → project
   - Ensures atomic all-or-nothing deletion to prevent partial state
   - Prevents orphaned data in the database
+- **User Deletion Fix**: Resolved foreign key constraint violation when deleting users
+  - Checks if user has projects before deletion
+  - Uses soft delete (marks user as inactive) to preserve historical data
+  - Prevents deletion if user is responsible for projects (clear error message)
+  - Maintains data integrity for comments and status logs
 
 # External Dependencies
 

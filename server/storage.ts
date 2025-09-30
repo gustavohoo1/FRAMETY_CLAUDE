@@ -167,7 +167,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteUser(id: string): Promise<void> {
-    await db.delete(users).where(eq(users.id, id));
+    // Check if user has projects as responsible
+    const userProjects = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(projetos)
+      .where(eq(projetos.responsavelId, id));
+    
+    const projectCount = Number(userProjects[0]?.count) || 0;
+    if (projectCount > 0) {
+      throw new Error(`Não é possível excluir este usuário pois ele é responsável por ${projectCount} projeto(s). Reatribua os projetos primeiro.`);
+    }
+
+    // Use soft delete to preserve historical data (comments, logs, etc.)
+    // Mark user as inactive instead of deleting
+    await db
+      .update(users)
+      .set({ ativo: false })
+      .where(eq(users.id, id));
   }
 
   async getProjetos(filters?: {

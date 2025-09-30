@@ -101,7 +101,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       await storage.deleteUser(req.params.id);
       res.status(204).send();
-    } catch (error) {
+    } catch (error: any) {
+      // Return 409 Conflict if user has projects
+      if (error.message?.includes("responsável por")) {
+        return res.status(409).json({ message: error.message });
+      }
       next(error);
     }
   });
