@@ -1,0 +1,69 @@
+Quero melhorar a aba Finalizados com os recursos abaixo, mantendo o visual atual como modo Card padrão.
+
+1) Alternar visualização
+
+Adicionar um toggle de visualização no topo (lado direito do título): “Card | Lista”.
+
+Card = layout atual (não alterar o estilo).
+
+Lista = tabela simples com colunas: Título, Cliente, Responsável, Tipo, Prioridade, Data de Aprovação.
+
+Persistir a escolha do usuário (ex.: localStorage) para manter ao voltar na página.
+
+2) Filtros
+
+Filtro por Data (mês/ano): um seletor “Mês/Ano” com presets (este mês, mês passado) + opção de intervalo personalizado.
+
+A métrica “X projetos” deve mostrar quantos foram aprovados no período filtrado (base: data_aprovacao).
+
+Filtro por Pessoa (Responsável): dropdown com todos os responsáveis que têm projetos finalizados.
+
+Filtros combináveis (data + pessoa).
+
+Mostrar chips de filtros ativos e botão “Limpar filtros”.
+
+3) Comportamento e contadores
+
+O contador verde no título (“N projetos”) deve refletir o total após filtros.
+
+Se não houver resultados, exibir estado vazio com mensagem “Nenhum projeto finalizado nesse filtro”.
+
+4) Desempenho e UX
+
+Paginação ou carregamento incremental quando houver muitos itens (mantendo ordenação por data_aprovacao desc).
+
+Manter dark/light e responsividade básica já existente (sem dedicar esforço mobile agora).
+
+Não alterar o botão/fluxo de “Adicionar Link do YouTube” nos cards.
+
+5) Dados
+
+Basear-se em status = Aprovado e campo data_aprovacao.
+
+A lista de pessoas deve vir dos usuários vinculados como responsável nesses projetos.
+
+Se necessário, criar endpoints leves para filtrar por período e responsável; do contrário, pode filtrar no cliente se já trouxer os dados.
+
+6) Escopo e entrega
+
+Edite apenas o front no diretório client/ (não mexer em regras de negócio).
+
+Não renomear componentes nem quebrar rotas.
+
+No topo de cada arquivo alterado, escreva um comentário curto explicando a mudança.
+
+Ao final, liste os arquivos modificados e descreva rapidamente o que mudou.
+
+7) Testes de aceite
+
+Alternar Card ↔ Lista funciona e a escolha fica salva.
+
+Filtro por mês retorna somente os aprovados naquele mês (ex.: “Outubro/2025”).
+
+Filtro por pessoa mostra apenas os projetos daquele responsável.
+
+Filtros combinados (mês + pessoa) funcionam e o contador reflete o total filtrado.
+
+Ordenação por data de aprovação (recente → antigo).
+
+Estado vazio aparece quando não há resultados.
