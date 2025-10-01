@@ -3,10 +3,8 @@ import { useSidebarLayout } from "@/hooks/use-sidebar-layout";
 import { Sidebar } from "@/components/sidebar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { TrendingUp, Users, Video, AlertTriangle } from "lucide-react";
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
 
 export default function Metrics() {
   const { mainContentClass } = useSidebarLayout();
@@ -38,11 +36,6 @@ export default function Metrics() {
       </div>
     );
   }
-
-  const statusData = Object.entries(metricas?.projetosPorStatus || {}).map(([status, count]) => ({
-    name: status,
-    value: count,
-  }));
 
   const responsavelData = Object.entries(metricas?.projetosPorResponsavel || {}).map(([responsavel, count]) => ({
     name: responsavel,
@@ -177,37 +170,6 @@ export default function Metrics() {
               {/* Charts Section */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 
-                {/* Status Distribution */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Distribuição por Status</CardTitle>
-                    <CardDescription>
-                      Quantidade de projetos em cada etapa
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <ResponsiveContainer width="100%" height={300}>
-                      <PieChart>
-                        <Pie
-                          data={statusData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                        >
-                          {statusData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-
                 {/* Projects by Responsible */}
                 <Card>
                   <CardHeader>
@@ -284,7 +246,7 @@ export default function Metrics() {
                       <div key={status} className="flex items-center justify-between">
                         <span className="text-sm font-medium">{status}</span>
                         <Badge variant="secondary" data-testid={`status-count-${status}`}>
-                          {count}
+                          {count as number}
                         </Badge>
                       </div>
                     ))}
