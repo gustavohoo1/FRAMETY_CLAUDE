@@ -5,11 +5,14 @@ import { sql } from 'drizzle-orm';
 import * as schema from '../shared/schema.js';
 import { users } from '../shared/schema.js';
 import crypto from 'crypto';
+import { promisify } from 'util';
 
-function hashPassword(password: string): string {
+const scryptAsync = promisify(crypto.scrypt);
+
+async function hashPassword(password: string): Promise<string> {
   const salt = crypto.randomBytes(16).toString("hex");
-  const hash = crypto.scryptSync(password, salt, 64).toString("hex");
-  return `${salt}:${hash}`;
+  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+  return `${buf.toString("hex")}.${salt}`;
 }
 
 async function setupDatabase() {
