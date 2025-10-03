@@ -92,6 +92,28 @@ Preferred communication style: Simple, everyday language.
   - **Dynamic Counter**: Project count badge updates based on active filters
   - **Smart Empty States**: Different messages for "no projects" vs "no results with filters"
   - **Accessibility**: Added DialogDescription to eliminate aria warnings
+- **Metrics Dashboard Simplification (October 2025)**: Removed PieChart status distribution card
+  - Kept 4 essential metric cards in 2x2 grid layout
+  - Cards: Projetos por Responsável, Projetos por Tipo de Vídeo, Vídeos por Cliente, Resumo por Status
+- **Render.com Deploy Configuration (October 2025)**: Prepared application for production deployment
+  - Created `render.yaml` for automatic deployment with database provisioning
+  - Added `.node-version` file specifying Node.js 20
+  - Created `.env.example` documenting required environment variables
+  - Added public health check endpoint at `/health` for Render monitoring
+  - Production-ready session configuration with secure cookies and trust proxy
+  - Complete deployment documentation in `DEPLOY_RENDER.md`
+
+## Deployment
+- **Platform**: Render.com (recommended)
+- **Configuration**: Auto-deploy via `render.yaml` blueprint
+- **Database**: PostgreSQL (provisioned automatically)
+- **Environment Variables**:
+  - `DATABASE_URL`: Auto-configured from Render PostgreSQL
+  - `SESSION_SECRET`: Auto-generated secure random value
+  - `NODE_ENV`: Set to `production`
+- **Health Check**: `/health` endpoint for service monitoring
+- **Build**: `npm install && npm run build`
+- **Start**: `npm start` (runs compiled production bundle)
 
 # External Dependencies
 

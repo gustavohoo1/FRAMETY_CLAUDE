@@ -14,7 +14,7 @@ services:
           property: connectionString
       - key: SESSION_SECRET
         generateValue: true
-    healthCheckPath: /api/user
+    healthCheckPath: /health
 
 databases:
   - name: framety-db

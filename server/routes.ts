@@ -23,6 +23,11 @@ function requireRole(roles: string[]) {
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
+  // Health check endpoint for Render.com (no auth required)
+  app.get("/health", (req, res) => {
+    res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
   // Initialize database with seed data
   app.post("/api/seed", async (req, res, next) => {
     try {
