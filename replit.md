@@ -25,14 +25,16 @@ Preferred communication style: Simple, everyday language.
 - **API Design**: RESTful endpoints with role-based access control
 
 ## Database Layer
-- **Database**: PostgreSQL via Neon serverless
+- **Database**: PostgreSQL (Neon serverless in development, standard PostgreSQL in production)
 - **ORM**: Drizzle ORM with schema validation
 - **Schema Design**: 
   - Users table with role-based permissions (Admin, Gestor, Membro)
   - Projects table with status tracking and relationships
   - Types and Tags for categorization
   - Audit logging for status changes
-- **Connection**: Connection pooling with @neondatabase/serverless
+- **Connection**: 
+  - Development (Replit): Connection pooling with @neondatabase/serverless + WebSocket
+  - Production (Render): Standard node-postgres with SSL support
 
 ## Authentication & Authorization
 - **Strategy**: Session-based authentication with secure password hashing
