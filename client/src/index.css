@@ -74,6 +74,17 @@
   --container-padding: clamp(1rem, 2vw, 2rem);                  /* 16px -> 32px */
   --section-spacing: clamp(2rem, 4vw, 4rem);                    /* 32px -> 64px */
   --element-gap: clamp(0.5rem, 1vw, 1rem);                      /* 8px -> 16px */
+  
+  /* Safe Area Insets - iOS and Android notch/navigation support */
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+  
+  /* Responsive Heights - Dynamic viewport with fallback */
+  --vh-small: 100vh;  /* Fallback for older browsers */
+  --vh-large: 100vh;
+  --vh-dynamic: 100dvh;  /* Modern dynamic viewport height */
 }
 
 .dark {
@@ -116,11 +127,39 @@
     @apply border-border;
     font-family: 'Poppins', sans-serif;
   }
+  
+  html {
+    /* Support dynamic viewport height */
+    height: 100vh;
+    height: var(--vh-dynamic, 100vh);
+  }
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
     font-size: var(--fluid-base);
     overflow: hidden; /* Body estático - sem scroll geral da página */
+    /* Full height with safe area support */
+    min-height: 100vh;
+    min-height: var(--vh-dynamic, 100vh);
+    /* Safe area padding */
+    padding-top: var(--safe-area-inset-top);
+    padding-right: var(--safe-area-inset-right);
+    padding-bottom: var(--safe-area-inset-bottom);
+    padding-left: var(--safe-area-inset-left);
+    /* Prevent text size adjustment on iOS */
+    -webkit-text-size-adjust: 100%;
+  }
+  
+  /* Focus visible styles for accessibility */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+  }
+  
+  /* Remove focus for mouse users, keep for keyboard */
+  *:focus:not(:focus-visible) {
+    outline: none;
   }
   
   /* Fluid Typography Elements */
@@ -311,4 +350,74 @@
   .project-card {
     margin-bottom: 0.75rem;
   }
+}
+
+/* Accessibility: Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  
+  /* Disable transforms for reduced motion */
+  .project-card:active,
+  button:active,
+  a:active,
+  [role="button"]:active {
+    transform: none !important;
+  }
+}
+
+/* Utility Classes for Safe Areas */
+.safe-top {
+  padding-top: var(--safe-area-inset-top);
+}
+
+.safe-right {
+  padding-right: var(--safe-area-inset-right);
+}
+
+.safe-bottom {
+  padding-bottom: var(--safe-area-inset-bottom);
+}
+
+.safe-left {
+  padding-left: var(--safe-area-inset-left);
+}
+
+.safe-x {
+  padding-left: var(--safe-area-inset-left);
+  padding-right: var(--safe-area-inset-right);
+}
+
+.safe-y {
+  padding-top: var(--safe-area-inset-top);
+  padding-bottom: var(--safe-area-inset-bottom);
+}
+
+.safe-all {
+  padding-top: var(--safe-area-inset-top);
+  padding-right: var(--safe-area-inset-right);
+  padding-bottom: var(--safe-area-inset-bottom);
+  padding-left: var(--safe-area-inset-left);
+}
+
+/* Responsive Height Utilities */
+.h-screen-safe {
+  height: 100vh;
+  height: var(--vh-dynamic, 100vh);
+}
+
+.min-h-screen-safe {
+  min-height: 100vh;
+  min-height: var(--vh-dynamic, 100vh);
+}
+
+.max-h-screen-safe {
+  max-height: 100vh;
+  max-height: var(--vh-dynamic, 100vh);
 }
