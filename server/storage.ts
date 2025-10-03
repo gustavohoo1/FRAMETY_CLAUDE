@@ -150,7 +150,7 @@ export class DatabaseStorage implements IStorage {
       const crypto = await import("crypto");
       const salt = crypto.randomBytes(16).toString("hex");
       const hash = crypto.scryptSync(updates.password, salt, 64).toString("hex");
-      updates.password = `${salt}:${hash}`;
+      updates.password = `${hash}.${salt}`;
     }
 
     const [user] = await db
