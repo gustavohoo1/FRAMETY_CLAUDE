@@ -235,14 +235,15 @@ export const insertProjetoSchema = createInsertSchema(projetos).omit({
   clienteId: z.string().optional().or(z.literal("")).transform((val) => val === "" ? null : val),
   empreendimentoId: z.string().optional().or(z.literal("")).transform((val) => val === "" ? null : val),
   
-  // Converte strings de data para Date usando horário local (UTC-3 Brasília)
+  // Converte strings de data para Date - usa meio-dia UTC para evitar problemas de timezone
   dataPrevistaEntrega: z.string().optional().or(z.literal("")).transform((val) => {
     if (!val || val === "" || typeof val !== 'string') return undefined;
     const parts = val.split('-');
     if (parts.length !== 3) return undefined;
     const [year, month, day] = parts.map(Number);
     if (isNaN(year) || isNaN(month) || isNaN(day)) return undefined;
-    return new Date(year, month - 1, day);
+    // Cria a data com meio-dia UTC para evitar problemas de mudança de dia
+    return new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
   }),
   dataInterna: z.string().optional().or(z.literal("")).transform((val) => {
     if (!val || val === "" || typeof val !== 'string') return undefined;
@@ -250,7 +251,7 @@ export const insertProjetoSchema = createInsertSchema(projetos).omit({
     if (parts.length !== 3) return undefined;
     const [year, month, day] = parts.map(Number);
     if (isNaN(year) || isNaN(month) || isNaN(day)) return undefined;
-    return new Date(year, month - 1, day);
+    return new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
   }),
   dataMeeting: z.string().optional().or(z.literal("")).transform((val) => {
     if (!val || val === "" || typeof val !== 'string') return undefined;
@@ -258,7 +259,7 @@ export const insertProjetoSchema = createInsertSchema(projetos).omit({
     if (parts.length !== 3) return undefined;
     const [year, month, day] = parts.map(Number);
     if (isNaN(year) || isNaN(month) || isNaN(day)) return undefined;
-    return new Date(year, month - 1, day);
+    return new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
   }),
   linkFrameIo: z.string().url().optional().or(z.literal("")),
   linkYoutube: z.string().url().optional().or(z.literal("")),
