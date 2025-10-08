@@ -232,9 +232,18 @@ export const insertProjetoSchema = createInsertSchema(projetos).omit({
   dataAprovacao: true,
 }).extend({
   // Converte strings vazias em null para campos opcionais de foreign key
-  responsavelId: z.string().optional().or(z.literal("")).transform((val) => val === "" ? null : val),
-  clienteId: z.string().optional().or(z.literal("")).transform((val) => val === "" ? null : val),
-  empreendimentoId: z.string().optional().or(z.literal("")).transform((val) => val === "" ? null : val),
+  responsavelId: z.union([z.string(), z.literal(""), z.null(), z.undefined()]).transform((val) => {
+    if (!val || val === "") return null;
+    return val;
+  }).nullable(),
+  clienteId: z.union([z.string(), z.literal(""), z.null(), z.undefined()]).transform((val) => {
+    if (!val || val === "") return null;
+    return val;
+  }).nullable(),
+  empreendimentoId: z.union([z.string(), z.literal(""), z.null(), z.undefined()]).transform((val) => {
+    if (!val || val === "") return null;
+    return val;
+  }).nullable(),
   
   // Converte strings de data para Date - usa meio-dia UTC para evitar problemas de timezone
   dataPrevistaEntrega: z.string().optional().or(z.literal("")).transform((val) => {
@@ -273,11 +282,20 @@ export const updateProjetoSchema = z.object({
   titulo: z.string().optional(),
   descricao: z.string().optional(),
   tipoVideoId: z.string().optional(),
-  responsavelId: z.string().optional().or(z.literal("")).transform((val) => val === "" ? null : val),
+  responsavelId: z.union([z.string(), z.literal(""), z.null(), z.undefined()]).transform((val) => {
+    if (!val || val === "") return null;
+    return val;
+  }).nullable().optional(),
   prioridade: z.enum(["Baixa", "Média", "Alta"]).optional(),
   status: z.enum(["Briefing", "Roteiro", "Captação", "Edição", "Revisão", "Aguardando Aprovação", "Aprovado"]).optional(),
-  clienteId: z.string().optional().or(z.literal("")).transform((val) => val === "" ? null : val),
-  empreendimentoId: z.string().optional().or(z.literal("")).transform((val) => val === "" ? null : val),
+  clienteId: z.union([z.string(), z.literal(""), z.null(), z.undefined()]).transform((val) => {
+    if (!val || val === "") return null;
+    return val;
+  }).nullable().optional(),
+  empreendimentoId: z.union([z.string(), z.literal(""), z.null(), z.undefined()]).transform((val) => {
+    if (!val || val === "") return null;
+    return val;
+  }).nullable().optional(),
   duracao: z.number().optional(),
   formato: z.string().optional(),
   captacao: z.boolean().optional(),
