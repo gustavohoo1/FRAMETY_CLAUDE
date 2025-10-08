@@ -18,7 +18,7 @@ const formSchema = z.object({
   titulo: z.string().min(1, "Título é obrigatório"),
   descricao: z.string().optional(),
   tipoVideoId: z.string().min(1, "Tipo de vídeo é obrigatório"),
-  responsavelId: z.string().min(1, "Responsável é obrigatório"),
+  responsavelId: z.string().optional(),
   prioridade: z.enum(["Baixa", "Média", "Alta"]).default("Média"),
   clienteId: z.string().optional(),
   empreendimentoId: z.string().optional(),
@@ -205,11 +205,11 @@ export function ProjectForm({ onSuccess, initialData, isEdit, projectId }: Proje
                 name="responsavelId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Responsável*</FormLabel>
+                    <FormLabel>Responsável</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger data-testid="select-responsavel">
-                          <SelectValue placeholder="Selecione..." />
+                          <SelectValue placeholder="Selecione (opcional)..." />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>

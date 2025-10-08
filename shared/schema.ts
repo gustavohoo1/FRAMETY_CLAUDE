@@ -75,7 +75,7 @@ export const projetos = pgTable("projetos", {
   tipoVideoId: varchar("tipo_video_id").references(() => tiposDeVideo.id).notNull(),
   tags: text("tags").array().default([]),
   status: projectStatusEnum("status").notNull().default("Briefing"),
-  responsavelId: varchar("responsavel_id").references(() => users.id).notNull(),
+  responsavelId: varchar("responsavel_id").references(() => users.id),
   dataCriacao: timestamp("data_criacao").defaultNow().notNull(),
   dataPrevistaEntrega: timestamp("data_prevista_entrega"),
   dataAprovacao: timestamp("data_aprovacao"),
@@ -232,6 +232,7 @@ export const insertProjetoSchema = createInsertSchema(projetos).omit({
   dataAprovacao: true,
 }).extend({
   // Converte strings vazias em null para campos opcionais de foreign key
+  responsavelId: z.string().optional().or(z.literal("")).transform((val) => val === "" ? null : val),
   clienteId: z.string().optional().or(z.literal("")).transform((val) => val === "" ? null : val),
   empreendimentoId: z.string().optional().or(z.literal("")).transform((val) => val === "" ? null : val),
   
@@ -272,7 +273,7 @@ export const updateProjetoSchema = z.object({
   titulo: z.string().optional(),
   descricao: z.string().optional(),
   tipoVideoId: z.string().optional(),
-  responsavelId: z.string().optional(),
+  responsavelId: z.string().optional().or(z.literal("")).transform((val) => val === "" ? null : val),
   prioridade: z.enum(["Baixa", "Média", "Alta"]).optional(),
   status: z.enum(["Briefing", "Roteiro", "Captação", "Edição", "Revisão", "Aguardando Aprovação", "Aprovado"]).optional(),
   clienteId: z.string().optional().or(z.literal("")).transform((val) => val === "" ? null : val),
