@@ -498,28 +498,29 @@ export function ProjectDetailsDrawer({
                 </div>
               </div>
 
-              {/* Fase, Duração e Formato */}
+              {/* Responsável, Duração e Formato */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Fase
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    Responsável
                   </label>
                   {isEditing ? (
                     <FormField
                       control={form.control}
-                      name="status"
+                      name="responsavelId"
                       render={({ field }) => (
                         <FormItem>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select onValueChange={field.onChange} defaultValue={field.value || ""}>
                             <FormControl>
-                              <SelectTrigger data-testid="select-status">
-                                <SelectValue />
+                              <SelectTrigger data-testid="select-responsavel">
+                                <SelectValue placeholder="Selecione (opcional)..." />
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              {["Briefing", "Roteiro", "Captação", "Edição", "Entrega", "Outros"].map((status) => (
-                                <SelectItem key={status} value={status}>
-                                  {status}
+                              {users.map((user) => (
+                                <SelectItem key={user.id} value={user.id}>
+                                  {user.nome}
                                 </SelectItem>
                               ))}
                             </SelectContent>
@@ -529,9 +530,9 @@ export function ProjectDetailsDrawer({
                       )}
                     />
                   ) : (
-                    <Badge className={getStatusBadgeColor(projeto.status)}>
-                      {projeto.status}
-                    </Badge>
+                    <p className="mt-1 text-gray-900 dark:text-gray-100">
+                      {projeto.responsavel?.nome || "—"}
+                    </p>
                   )}
                 </div>
 
