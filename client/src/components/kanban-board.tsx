@@ -163,12 +163,19 @@ export function KanbanBoard({ filters }: KanbanBoardProps) {
     
     if (!result.destination) return;
 
-    const { draggableId, destination } = result;
-    const newStatus = destination.droppableId;
+    const { draggableId, source, destination } = result;
     
+    // Se soltou na mesma posição, não faz nada
+    if (source.droppableId === destination.droppableId && source.index === destination.index) {
+      return;
+    }
+
     const projeto = projetos.find(p => p.id === draggableId);
     if (!projeto) return;
 
+    const newStatus = destination.droppableId;
+    
+    // Faz a requisição para o servidor apenas se mudou de status
     if (projeto.status !== newStatus) {
       updateProjectMutation.mutate({ id: draggableId, status: newStatus });
     }
