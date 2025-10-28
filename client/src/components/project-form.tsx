@@ -1,3 +1,4 @@
+import { useMemo, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -69,6 +70,34 @@ export function ProjectForm({ onSuccess, initialData, isEdit, projectId }: Proje
         : "",
     },
   });
+
+  // Observar campo clienteId para filtrar empreendimentos
+  const clienteSelecionado = form.watch("clienteId");
+  
+  // Filtrar empreendimentos baseado no cliente selecionado
+  const empreendimentosFiltrados = useMemo(() => {
+    if (!clienteSelecionado || clienteSelecionado === "") {
+      return empreendimentos; // Se nenhum cliente selecionado, mostra todos
+    }
+    return empreendimentos.filter(emp => emp.clienteId === clienteSelecionado);
+  }, [empreendimentos, clienteSelecionado]);
+
+  // Limpar empreendimento quando cliente mudar
+  useEffect(() => {
+    const empreendimentoAtual = form.getValues("empreendimentoId");
+    
+    if (empreendimentoAtual && clienteSelecionado) {
+      // Verifica se o empreendimento atual pertence ao cliente selecionado
+      const empreendimentoValido = empreendimentos.find(
+        emp => emp.id === empreendimentoAtual && emp.clienteId === clienteSelecionado
+      );
+      
+      // Se não for válido, limpa o campo
+      if (!empreendimentoValido) {
+        form.setValue("empreendimentoId", "");
+      }
+    }
+  }, [clienteSelecionado, empreendimentos, form]);
 
   const createMutation = useMutation({
     mutationFn: async (data: InsertProjeto) => {
@@ -308,7 +337,7 @@ export function ProjectForm({ onSuccess, initialData, isEdit, projectId }: Proje
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {empreendimentos.map((empreendimento) => (
+                      {empreendimentosFiltrados.map((empreendimento) => (
                         <SelectItem key={empreendimento.id} value={empreendimento.id} data-testid={`option-empreendimento-${empreendimento.id}`}>
                           {empreendimento.nome} - {empreendimento.cliente.nome}
                         </SelectItem>
