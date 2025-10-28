@@ -139,6 +139,15 @@ Preferred communication style: Simple, everyday language.
   - **Auto-clear Logic**: `useEffect` automatically clears empreendimento field when client changes and current value is invalid
   - **UX Improvement**: When no client selected, shows all empreendimentos; when client selected (e.g., EBM), shows only EBM's empreendimentos
   - **Consistency**: Same implementation pattern in both components for unified UX across create and edit workflows
+- **Notes System (October 2025)**: Complete personal notes management feature for storing files, annotations, and passwords
+  - **Database Schema**: New `notas` table with support for multiple types (Nota, Senha, Arquivo)
+  - **Password Management**: Secure password storage with username/email, URL, and visibility toggle
+  - **Rich Features**: Favorite marking, categorization, type-based filtering
+  - **Security**: User-scoped notes with ownership verification on all API operations
+  - **UI Components**: Clean card-based interface with create/edit modal, password reveal/copy buttons
+  - **Navigation**: Added to both sidebar and mobile navigation
+  - **Full CRUD**: Complete create, read, update, delete operations with toast feedback
+  - **E2E Tested**: Comprehensive test coverage for all features including password toggle and filtering
 
 ## Deployment
 - **Platform**: Render.com (recommended)
