@@ -61,6 +61,10 @@ export default function NotasPage() {
   const [usuarioNome, setUsuarioNome] = useState("");
   const [url, setUrl] = useState("");
   const [showPassword, setShowPassword] = useState<Record<string, boolean>>({});
+  const [fileKey, setFileKey] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
+  const [fileSize, setFileSize] = useState<number | null>(null);
+  const [fileMimeType, setFileMimeType] = useState<string | null>(null);
 
   const { data: notas = [], isLoading } = useQuery<Nota[]>({
     queryKey: ["/api/notas", filtroTipo, filtroCategoria],
@@ -138,6 +142,10 @@ export default function NotasPage() {
     setSenha("");
     setUsuarioNome("");
     setUrl("");
+    setFileKey(null);
+    setFileName(null);
+    setFileSize(null);
+    setFileMimeType(null);
   };
 
   const openEditModal = (nota: Nota) => {
@@ -149,6 +157,10 @@ export default function NotasPage() {
     setSenha(nota.senha || "");
     setUsuarioNome(nota.usuarioNome || "");
     setUrl(nota.url || "");
+    setFileKey(nota.fileKey || null);
+    setFileName(nota.fileName || null);
+    setFileSize(nota.fileSize || null);
+    setFileMimeType(nota.fileMimeType || null);
   };
 
   const handleSubmit = () => {
@@ -165,10 +177,29 @@ export default function NotasPage() {
       data.url = url;
     }
 
+    if (tipo === "Arquivo") {
+      data.fileKey = fileKey;
+      data.fileName = fileName;
+      data.fileSize = fileSize;
+      data.fileMimeType = fileMimeType;
+    }
+
     if (editingNota) {
       updateMutation.mutate({ id: editingNota.id, data });
     } else {
       createMutation.mutate(data);
+    }
+  };
+
+  const handleFileUpload = async (result: UploadResult) => {
+    const file = result.successful[0];
+    if (file && file.response) {
+      const response = file.response as any;
+      setFileKey(response.objectKey);
+      setFileName(file.name);
+      setFileSize(file.size);
+      setFileMimeType(file.type || "application/octet-stream");
+      toast({ title: "Arquivo enviado com sucesso!" });
     }
   };
 
@@ -256,6 +287,8 @@ export default function NotasPage() {
                       <div className="flex items-center gap-2 flex-1">
                         {nota.tipo === "Senha" ? (
                           <Lock className="h-4 w-4 text-orange-500" />
+                        ) : nota.tipo === "Arquivo" ? (
+                          <FileText className="h-4 w-4 text-green-500" />
                         ) : (
                           <StickyNote className="h-4 w-4 text-blue-500" />
                         )}
@@ -349,6 +382,43 @@ export default function NotasPage() {
                               {nota.url}
                             </a>
                           </div>
+                        )}
+                      </div>
+                    ) : nota.tipo === "Arquivo" ? (
+                      <div className="space-y-2">
+                        {nota.fileName ? (
+                          <>
+                            <div className="flex items-center gap-2 p-3 bg-muted rounded-md">
+                              <FileText className="h-5 w-5 text-muted-foreground" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">{nota.fileName}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {nota.fileSize ? `${(nota.fileSize / 1024).toFixed(2)} KB` : ""}
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full"
+                              onClick={() => {
+                                if (nota.fileKey) {
+                                  window.open(`/objects${nota.fileKey}`, "_blank");
+                                }
+                              }}
+                              data-testid={`button-download-${nota.id}`}
+                            >
+                              <Download className="h-4 w-4 mr-2" />
+                              Baixar Arquivo
+                            </Button>
+                          </>
+                        ) : (
+                          <p className="text-sm text-muted-foreground">Nenhum arquivo anexado</p>
+                        )}
+                        {nota.conteudo && (
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {nota.conteudo}
+                          </p>
                         )}
                       </div>
                     ) : (
@@ -471,6 +541,36 @@ export default function NotasPage() {
                   />
                 </div>
               </>
+            ) : tipo === "Arquivo" ? (
+              <div>
+                <label className="text-sm font-medium mb-2 block">Arquivo</label>
+                {fileName ? (
+                  <div className="flex items-center gap-2 p-3 border rounded-md">
+                    <FileText className="h-5 w-5 text-muted-foreground" />
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{fileName}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {fileSize ? `${(fileSize / 1024).toFixed(2)} KB` : ""}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setFileKey(null);
+                        setFileName(null);
+                        setFileSize(null);
+                        setFileMimeType(null);
+                      }}
+                      data-testid="button-remove-file"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <ObjectUploader onUploadComplete={handleFileUpload} />
+                )}
+              </div>
             ) : (
               <div>
                 <label className="text-sm font-medium mb-2 block">Conteúdo</label>

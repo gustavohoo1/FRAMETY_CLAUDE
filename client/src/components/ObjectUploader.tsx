@@ -1,35 +1,22 @@
 // Reference: blueprint:javascript_object_storage
 import { useState } from "react";
-import type { ReactNode } from "react";
 import Uppy from "@uppy/core";
 import { DashboardModal } from "@uppy/react";
-import "@uppy/core/dist/style.min.css";
-import "@uppy/dashboard/dist/style.min.css";
 import AwsS3 from "@uppy/aws-s3";
 import type { UploadResult } from "@uppy/core";
 import { Button } from "@/components/ui/button";
+import { Upload } from "lucide-react";
 
 interface ObjectUploaderProps {
   maxNumberOfFiles?: number;
   maxFileSize?: number;
-  onGetUploadParameters: () => Promise<{
-    method: "PUT";
-    url: string;
-  }>;
-  onComplete?: (
-    result: UploadResult<Record<string, unknown>, Record<string, unknown>>
-  ) => void;
-  buttonClassName?: string;
-  children: ReactNode;
+  onUploadComplete?: (result: UploadResult) => void;
 }
 
 export function ObjectUploader({
   maxNumberOfFiles = 1,
   maxFileSize = 10485760, // 10MB default
-  onGetUploadParameters,
-  onComplete,
-  buttonClassName,
-  children,
+  onUploadComplete,
 }: ObjectUploaderProps) {
   const [showModal, setShowModal] = useState(false);
   const [uppy] = useState(() =>
@@ -42,11 +29,39 @@ export function ObjectUploader({
     })
       .use(AwsS3, {
         shouldUseMultipart: false,
-        getUploadParameters: onGetUploadParameters,
+        getUploadParameters: async (file) => {
+          // Get presigned upload URL from our backend
+          const response = await fetch("/api/objects/upload", {
+            method: "POST",
+            credentials: "include",
+          });
+          const { uploadURL } = await response.json();
+          
+          return {
+            method: "PUT" as const,
+            url: uploadURL,
+            headers: {
+              "Content-Type": file.type || "application/octet-stream",
+            },
+          };
+        },
       })
       .on("complete", (result) => {
-        onComplete?.(result);
-        setShowModal(false);
+        if (result.successful.length > 0) {
+          // Extract object key from upload URL
+          const uploadedFile = result.successful[0];
+          const uploadUrl = uploadedFile.uploadURL;
+          const objectKey = uploadUrl ? new URL(uploadUrl).pathname : "";
+          
+          // Add objectKey to response
+          uploadedFile.response = {
+            ...uploadedFile.response,
+            objectKey: objectKey,
+          };
+          
+          onUploadComplete?.(result);
+          setShowModal(false);
+        }
       })
   );
 
@@ -54,10 +69,13 @@ export function ObjectUploader({
     <div>
       <Button 
         onClick={() => setShowModal(true)} 
-        className={buttonClassName}
+        variant="outline"
         type="button"
+        className="w-full"
+        data-testid="button-upload-file"
       >
-        {children}
+        <Upload className="h-4 w-4 mr-2" />
+        Selecionar Arquivo
       </Button>
 
       <DashboardModal
