@@ -69,9 +69,25 @@ export function KanbanBoard({ filters }: KanbanBoardProps) {
       // Salvar estado anterior para rollback se necessário
       const previousProjetos = queryClient.getQueryData(["/api/projetos", filters]);
       
-      // Atualizar cache otimisticamente
+      // Atualizar cache otimisticamente e reordenar para card movido aparecer no topo
       queryClient.setQueryData(["/api/projetos", filters], (old: ProjetoWithRelations[] | undefined) => {
         if (!old) return old;
+        
+        // Encontrar o projeto que está sendo movido
+        const movedProject = old.find(p => p.id === id);
+        if (!movedProject) return old;
+        
+        // Se o status mudou, reordenar para o card aparecer primeiro na nova coluna
+        if (movedProject.status !== newStatus) {
+          // Atualizar o status do projeto
+          const updatedProject = { ...movedProject, status: newStatus };
+          
+          // Remover o projeto da lista antiga e adicionar no início
+          const withoutMoved = old.filter(p => p.id !== id);
+          return [updatedProject, ...withoutMoved];
+        }
+        
+        // Se o status não mudou, apenas manter como está
         return old.map(projeto => 
           projeto.id === id ? { ...projeto, status: newStatus } : projeto
         );
