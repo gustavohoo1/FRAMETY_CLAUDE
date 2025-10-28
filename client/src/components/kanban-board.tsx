@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
@@ -37,8 +37,6 @@ export function KanbanBoard({ filters }: KanbanBoardProps) {
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<ProjetoWithRelations | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [orderedProjects, setOrderedProjects] = useState<ProjetoWithRelations[]>([]);
-  
   // Hook de auto-scroll para arrastar cards até as bordas
   const scrollContainerRef = useAutoScroll({
     enabled: isDragging,
@@ -67,33 +65,33 @@ export function KanbanBoard({ filters }: KanbanBoardProps) {
     },
   });
 
-  // Atualizar orderedProjects quando projetos mudar
-  useEffect(() => {
-    setOrderedProjects(projetos);
-  }, [projetos]);
+  // Usar projetos diretamente - local state management apenas durante drag
+  const [localOrder, setLocalOrder] = useState<string[]>([]);
+  const [isDraggingLocal, setIsDraggingLocal] = useState(false);
+  
+  // Durante drag, usar ordem local; caso contrário usar projetos do servidor
+  const orderedProjects = useMemo(() => {
+    if (!isDraggingLocal || localOrder.length === 0) {
+      return projetos;
+    }
+    
+    // Reordenar projetos baseado em localOrder
+    const projectMap = new Map(projetos.map(p => [p.id, p]));
+    const ordered = localOrder
+      .map(id => projectMap.get(id))
+      .filter((p): p is ProjetoWithRelations => p !== undefined);
+    
+    // Adicionar projetos que não estão em localOrder (novos)
+    const orderedIds = new Set(localOrder);
+    const newProjects = projetos.filter(p => !orderedIds.has(p.id));
+    
+    return [...ordered, ...newProjects];
+  }, [projetos, localOrder, isDraggingLocal]);
 
   const updateProjectMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const response = await apiRequest("PATCH", `/api/projetos/${id}`, { status });
       return response.json();
-    },
-    // Optimistic update: atualiza a UI imediatamente antes da resposta do servidor
-    onMutate: async ({ id, status: newStatus }) => {
-      // Cancelar queries em andamento para evitar conflito
-      await queryClient.cancelQueries({ queryKey: ["/api/projetos"] });
-      
-      // Salvar estado anterior para rollback se necessário
-      const previousProjetos = queryClient.getQueryData(["/api/projetos", filters]);
-      
-      // Atualizar cache otimisticamente
-      queryClient.setQueryData(["/api/projetos", filters], (old: ProjetoWithRelations[] | undefined) => {
-        if (!old) return old;
-        return old.map(projeto => 
-          projeto.id === id ? { ...projeto, status: newStatus } : projeto
-        );
-      });
-      
-      return { previousProjetos };
     },
     onSuccess: (updatedProject, { status }) => {
       // Invalidar queries para garantir sincronização com servidor
@@ -112,12 +110,7 @@ export function KanbanBoard({ filters }: KanbanBoardProps) {
         });
       }
     },
-    onError: (error: Error, variables, context) => {
-      // Rollback: reverter para estado anterior em caso de erro
-      if (context?.previousProjetos) {
-        queryClient.setQueryData(["/api/projetos", filters], context.previousProjetos);
-      }
-      
+    onError: (error: Error) => {
       toast({
         title: "Erro ao atualizar projeto",
         description: error.message,
@@ -161,62 +154,40 @@ export function KanbanBoard({ filters }: KanbanBoardProps) {
   const onDragStart = useCallback((start: any) => {
     setDraggedItem(start.draggableId);
     setIsDragging(true);
-  }, []);
+    setIsDraggingLocal(true);
+    // Inicializa localOrder com ordem atual se ainda não foi iniciado
+    setLocalOrder(orderedProjects.map(p => p.id));
+  }, [orderedProjects]);
 
   const onDragEnd = useCallback((result: DropResult) => {
     setDraggedItem(null);
     setIsDragging(false);
+    setIsDraggingLocal(false);
     
-    if (!result.destination) return;
+    if (!result.destination) {
+      setLocalOrder([]);
+      return;
+    }
 
     const { draggableId, source, destination } = result;
     
     // Se soltou na mesma posição, não faz nada
     if (source.droppableId === destination.droppableId && source.index === destination.index) {
+      setLocalOrder([]);
       return;
     }
 
     const projeto = orderedProjects.find(p => p.id === draggableId);
-    if (!projeto) return;
+    if (!projeto) {
+      setLocalOrder([]);
+      return;
+    }
 
     const newStatus = destination.droppableId;
     const oldStatus = projeto.status;
     
-    // Reordena localmente para manter a posição visual
-    setOrderedProjects(prev => {
-      const newProjects = [...prev];
-      
-      // Encontra o projeto que está sendo movido
-      const movedIndex = newProjects.findIndex(p => p.id === draggableId);
-      const [movedProject] = newProjects.splice(movedIndex, 1);
-      
-      // Cria uma cópia do projeto com o novo status
-      const updatedProject = { ...movedProject, status: newStatus as typeof movedProject.status };
-      
-      // Agrupa projetos por status (exclui o projeto movido)
-      const projectsByStatus: Record<string, ProjetoWithRelations[]> = {};
-      statusColumns.forEach(col => {
-        projectsByStatus[col.id] = newProjects.filter(p => p.status === col.id);
-      });
-      
-      // Insere o projeto atualizado na posição correta da coluna de destino
-      if (!projectsByStatus[newStatus]) {
-        projectsByStatus[newStatus] = [];
-      }
-      // Garante que o index não exceda o tamanho do array
-      const insertIndex = Math.min(destination.index, projectsByStatus[newStatus].length);
-      projectsByStatus[newStatus].splice(insertIndex, 0, updatedProject);
-      
-      // Reconstrói a lista na ordem correta das colunas
-      const result: ProjetoWithRelations[] = [];
-      statusColumns.forEach(col => {
-        if (projectsByStatus[col.id]) {
-          result.push(...projectsByStatus[col.id]);
-        }
-      });
-      
-      return result;
-    });
+    // Limpar localOrder - agora usamos projetos do servidor
+    setLocalOrder([]);
     
     // Faz a requisição para o servidor apenas se mudou de status
     if (oldStatus !== newStatus) {
