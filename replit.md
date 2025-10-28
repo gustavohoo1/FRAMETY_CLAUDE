@@ -132,12 +132,13 @@ Preferred communication style: Simple, everyday language.
   - **Counting Rule**: Projects with status "Aprovado" now count ONLY in "Projetos Aprovados" metric
   - **Implementation**: Added WHERE filters to exclude status "Aprovado" from three aggregation queries in getMetricas()
   - **Result**: Cleaner metrics that show only active/in-progress work, approved projects tracked separately
-- **Cascading Filter for Empreendimentos (October 2025)**: Project drawer now filters empreendimentos based on selected cliente
+- **Cascading Filter for Empreendimentos (October 2025)**: Both project forms now filter empreendimentos based on selected cliente
+  - **Dual Implementation**: Cascading filter added to both ProjectForm (create) and ProjectDetailsDrawer (edit)
   - **Form Integration**: Uses `form.watch("clienteId")` to observe client field changes in real-time
   - **Smart Filtering**: `useMemo` filters empreendimentos list to show only those belonging to selected cliente
   - **Auto-clear Logic**: `useEffect` automatically clears empreendimento field when client changes and current value is invalid
   - **UX Improvement**: When no client selected, shows all empreendimentos; when client selected (e.g., EBM), shows only EBM's empreendimentos
-  - **Implementation**: Added in project-details-drawer.tsx using React Hook Form's watch API with memoized filtering for performance
+  - **Consistency**: Same implementation pattern in both components for unified UX across create and edit workflows
 
 ## Deployment
 - **Platform**: Render.com (recommended)
