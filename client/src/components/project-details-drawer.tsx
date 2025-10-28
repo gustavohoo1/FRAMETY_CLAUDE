@@ -145,11 +145,12 @@ export function ProjectDetailsDrawer({
     }
   }, [projeto, form]);
 
-  // Filtrar empreendimentos baseado no cliente selecionado
+  // Observar campo clienteId para filtrar empreendimentos
   const clienteSelecionado = form.watch("clienteId");
   
+  // Filtrar empreendimentos baseado no cliente selecionado
   const empreendimentosFiltrados = useMemo(() => {
-    if (!clienteSelecionado) {
+    if (!clienteSelecionado || clienteSelecionado === "") {
       return empreendimentos; // Se nenhum cliente selecionado, mostra todos
     }
     return empreendimentos.filter(emp => emp.clienteId === clienteSelecionado);
