@@ -3,6 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Sidebar } from "@/components/sidebar";
 import { MobileTopbar } from "@/components/mobile-topbar";
+import { useSidebarLayout } from "@/hooks/use-sidebar-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -40,6 +41,7 @@ import { format } from "date-fns";
 
 export default function NotasPage() {
   const { toast } = useToast();
+  const { mainContentClass } = useSidebarLayout();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingNota, setEditingNota] = useState<Nota | null>(null);
   const [filtroTipo, setFiltroTipo] = useState<string>("todos");
@@ -173,12 +175,13 @@ export default function NotasPage() {
   const categorias = Array.from(new Set(notas.map((n) => n.categoria).filter(Boolean)));
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen overflow-hidden">
       <Sidebar />
       <MobileTopbar />
 
-      <main className="flex-1 overflow-y-auto">
-        <div className="p-6 md:p-8 max-w-7xl mx-auto">
+      <div className={`${mainContentClass} flex flex-col flex-1 overflow-hidden transition-all duration-300`}>
+        <main className="flex-1 overflow-y-auto">
+          <div className="p-6 md:p-8 max-w-7xl mx-auto">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -509,6 +512,7 @@ export default function NotasPage() {
           </div>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 }
