@@ -7,6 +7,8 @@ import { useSidebarLayout } from "@/hooks/use-sidebar-layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { ObjectUploader } from "@/components/ObjectUploader";
+import type { UploadResult } from "@uppy/core";
 import {
   Dialog,
   DialogContent,
@@ -35,6 +37,9 @@ import {
   Trash2,
   Star,
   StarOff,
+  Download,
+  FileText,
+  Upload,
 } from "lucide-react";
 import type { Nota } from "@shared/schema";
 import { format } from "date-fns";

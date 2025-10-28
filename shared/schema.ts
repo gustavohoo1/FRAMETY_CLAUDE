@@ -126,6 +126,11 @@ export const notas = pgTable("notas", {
   senha: text("senha"), // senha mascarada/criptografada para notas do tipo "Senha"
   usuarioNome: text("usuario_nome"), // para senhas - campo de usuário/email
   url: text("url"), // para senhas - URL do serviço
+  // Campos de arquivo para notas do tipo "Arquivo"
+  fileName: text("file_name"), // Nome original do arquivo
+  fileKey: text("file_key"), // Caminho/key do arquivo no object storage
+  fileSize: integer("file_size"), // Tamanho do arquivo em bytes
+  fileMimeType: text("file_mime_type"), // Tipo MIME do arquivo
   usuarioId: varchar("usuario_id").references(() => users.id).notNull(),
   favorito: boolean("favorito").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
