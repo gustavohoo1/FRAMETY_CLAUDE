@@ -19,6 +19,7 @@ export const projectStatusEnum = pgEnum("project_status", [
   "Cancelado"
 ]);
 export const priorityEnum = pgEnum("priority", ["Baixa", "Média", "Alta"]);
+export const noteTipoEnum = pgEnum("note_tipo", ["Nota", "Senha", "Arquivo"]);
 
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -116,11 +117,27 @@ export const comentarios = pgTable("comentarios", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const notas = pgTable("notas", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  titulo: text("titulo").notNull(),
+  conteudo: text("conteudo"),
+  tipo: noteTipoEnum("tipo").notNull().default("Nota"),
+  categoria: text("categoria"),
+  senha: text("senha"), // senha mascarada/criptografada para notas do tipo "Senha"
+  usuarioNome: text("usuario_nome"), // para senhas - campo de usuário/email
+  url: text("url"), // para senhas - URL do serviço
+  usuarioId: varchar("usuario_id").references(() => users.id).notNull(),
+  favorito: boolean("favorito").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   projetosResponsavel: many(projetos, { relationName: "responsavel" }),
   logsDeStatus: many(logsDeStatus),
   comentarios: many(comentarios),
+  notas: many(notas),
 }));
 
 export const tiposDeVideoRelations = relations(tiposDeVideo, ({ many }) => ({
@@ -179,6 +196,13 @@ export const comentariosRelations = relations(comentarios, ({ one }) => ({
   }),
   autor: one(users, {
     fields: [comentarios.autorId],
+    references: [users.id],
+  }),
+}));
+
+export const notasRelations = relations(notas, ({ one }) => ({
+  usuario: one(users, {
+    fields: [notas.usuarioId],
     references: [users.id],
   }),
 }));
@@ -384,6 +408,12 @@ export const insertComentarioSchema = createInsertSchema(comentarios).omit({
   createdAt: true,
 });
 
+export const insertNotaSchema = createInsertSchema(notas).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -402,6 +432,8 @@ export type LogStatus = typeof logsDeStatus.$inferSelect;
 export type InsertLogStatus = z.infer<typeof insertLogStatusSchema>;
 export type Comentario = typeof comentarios.$inferSelect;
 export type InsertComentario = z.infer<typeof insertComentarioSchema>;
+export type Nota = typeof notas.$inferSelect;
+export type InsertNota = z.infer<typeof insertNotaSchema>;
 
 // Extended types with relations
 export type ProjetoWithRelations = Projeto & {

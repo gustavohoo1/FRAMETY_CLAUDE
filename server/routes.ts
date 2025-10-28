@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { setupAuth } from "./auth";
 import { storage } from "./storage";
-import { insertProjetoSchema, updateProjetoSchema, insertLogStatusSchema, insertClienteSchema, insertEmpreendimentoSchema, insertTagSchema, insertTipoVideoSchema, insertComentarioSchema } from "@shared/schema";
+import { insertProjetoSchema, updateProjetoSchema, insertLogStatusSchema, insertClienteSchema, insertEmpreendimentoSchema, insertTagSchema, insertTipoVideoSchema, insertComentarioSchema, insertNotaSchema } from "@shared/schema";
 
 function requireAuth(req: any, res: any, next: any) {
   if (!req.isAuthenticated()) {
@@ -489,6 +489,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/comentarios/:id", requireAuth, async (req, res, next) => {
     try {
       await storage.deleteComentario(req.params.id);
+      res.sendStatus(204);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Notas routes
+  app.get("/api/notas", requireAuth, async (req, res, next) => {
+    try {
+      const { tipo, categoria, favorito } = req.query;
+      const filters: any = {};
+      if (tipo) filters.tipo = tipo;
+      if (categoria) filters.categoria = categoria;
+      if (favorito !== undefined) filters.favorito = favorito === 'true';
+      
+      const notas = await storage.getNotas(req.user!.id, filters);
+      res.json(notas);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/notas/:id", requireAuth, async (req, res, next) => {
+    try {
+      const nota = await storage.getNota(req.params.id);
+      if (!nota) {
+        return res.status(404).json({ message: "Nota não encontrada" });
+      }
+      // Verificar se a nota pertence ao usuário
+      if (nota.usuarioId !== req.user!.id) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+      res.json(nota);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/notas", requireAuth, async (req, res, next) => {
+    try {
+      const notaData = insertNotaSchema.parse({
+        ...req.body,
+        usuarioId: req.user!.id
+      });
+      const nota = await storage.createNota(notaData);
+      res.status(201).json(nota);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.patch("/api/notas/:id", requireAuth, async (req, res, next) => {
+    try {
+      const nota = await storage.getNota(req.params.id);
+      if (!nota) {
+        return res.status(404).json({ message: "Nota não encontrada" });
+      }
+      if (nota.usuarioId !== req.user!.id) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+      
+      const notaData = insertNotaSchema.partial().parse(req.body);
+      const updatedNota = await storage.updateNota(req.params.id, notaData);
+      res.json(updatedNota);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/notas/:id", requireAuth, async (req, res, next) => {
+    try {
+      const nota = await storage.getNota(req.params.id);
+      if (!nota) {
+        return res.status(404).json({ message: "Nota não encontrada" });
+      }
+      if (nota.usuarioId !== req.user!.id) {
+        return res.status(403).json({ message: "Acesso negado" });
+      }
+      
+      await storage.deleteNota(req.params.id);
       res.sendStatus(204);
     } catch (error) {
       next(error);

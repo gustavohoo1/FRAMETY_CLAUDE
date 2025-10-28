@@ -7,6 +7,7 @@ import {
   clientes,
   empreendimentos,
   comentarios,
+  notas,
   type User, 
   type InsertUser, 
   type Projeto,
@@ -25,7 +26,9 @@ import {
   type ProjetoWithRelations,
   type Comentario,
   type InsertComentario,
-  type ComentarioWithRelations
+  type ComentarioWithRelations,
+  type Nota,
+  type InsertNota
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, or, like, desc, asc, sql } from "drizzle-orm";
@@ -94,6 +97,13 @@ export interface IStorage {
   createComentario(comentario: InsertComentario): Promise<Comentario>;
   updateComentario(id: string, comentario: Partial<InsertComentario>): Promise<Comentario>;
   deleteComentario(id: string): Promise<void>;
+  
+  // Notas
+  getNotas(usuarioId: string, filters?: { tipo?: string; categoria?: string; favorito?: boolean }): Promise<Nota[]>;
+  getNota(id: string): Promise<Nota | undefined>;
+  createNota(nota: InsertNota): Promise<Nota>;
+  updateNota(id: string, nota: Partial<InsertNota>): Promise<Nota>;
+  deleteNota(id: string): Promise<void>;
   
   // Métricas
   getMetricas(): Promise<{
@@ -514,6 +524,53 @@ export class DatabaseStorage implements IStorage {
 
   async deleteComentario(id: string): Promise<void> {
     await db.delete(comentarios).where(eq(comentarios.id, id));
+  }
+
+  async getNotas(usuarioId: string, filters?: { tipo?: string; categoria?: string; favorito?: boolean }): Promise<Nota[]> {
+    let query = db.select().from(notas).where(eq(notas.usuarioId, usuarioId));
+
+    const conditions = [eq(notas.usuarioId, usuarioId)];
+
+    if (filters?.tipo) {
+      conditions.push(eq(notas.tipo, filters.tipo as any));
+    }
+    if (filters?.categoria) {
+      conditions.push(eq(notas.categoria, filters.categoria));
+    }
+    if (filters?.favorito !== undefined) {
+      conditions.push(eq(notas.favorito, filters.favorito));
+    }
+
+    const results = await db
+      .select()
+      .from(notas)
+      .where(and(...conditions))
+      .orderBy(desc(notas.updatedAt));
+
+    return results;
+  }
+
+  async getNota(id: string): Promise<Nota | undefined> {
+    const [nota] = await db.select().from(notas).where(eq(notas.id, id));
+    return nota;
+  }
+
+  async createNota(nota: InsertNota): Promise<Nota> {
+    const [newNota] = await db.insert(notas).values(nota).returning();
+    return newNota;
+  }
+
+  async updateNota(id: string, nota: Partial<InsertNota>): Promise<Nota> {
+    const [updatedNota] = await db
+      .update(notas)
+      .set({ ...nota, updatedAt: new Date() })
+      .where(eq(notas.id, id))
+      .returning();
+    return updatedNota;
+  }
+
+  async deleteNota(id: string): Promise<void> {
+    await db.delete(notas).where(eq(notas.id, id));
   }
 
   async getMetricas() {
