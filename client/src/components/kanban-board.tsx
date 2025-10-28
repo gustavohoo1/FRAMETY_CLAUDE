@@ -69,9 +69,7 @@ export function KanbanBoard({ filters }: KanbanBoardProps) {
 
   // Atualizar orderedProjects quando projetos mudar
   useEffect(() => {
-    if (projetos.length > 0) {
-      setOrderedProjects(projetos);
-    }
+    setOrderedProjects(projetos);
   }, [projetos]);
 
   const updateProjectMutation = useMutation({
@@ -182,6 +180,7 @@ export function KanbanBoard({ filters }: KanbanBoardProps) {
     if (!projeto) return;
 
     const newStatus = destination.droppableId;
+    const oldStatus = projeto.status;
     
     // Reordena localmente para manter a posição visual
     setOrderedProjects(prev => {
@@ -191,27 +190,36 @@ export function KanbanBoard({ filters }: KanbanBoardProps) {
       const movedIndex = newProjects.findIndex(p => p.id === draggableId);
       const [movedProject] = newProjects.splice(movedIndex, 1);
       
-      // Atualiza o status se mudou de coluna
-      if (movedProject.status !== newStatus) {
-        movedProject.status = newStatus as typeof movedProject.status;
+      // Cria uma cópia do projeto com o novo status
+      const updatedProject = { ...movedProject, status: newStatus as typeof movedProject.status };
+      
+      // Agrupa projetos por status (exclui o projeto movido)
+      const projectsByStatus: Record<string, ProjetoWithRelations[]> = {};
+      statusColumns.forEach(col => {
+        projectsByStatus[col.id] = newProjects.filter(p => p.status === col.id);
+      });
+      
+      // Insere o projeto atualizado na posição correta da coluna de destino
+      if (!projectsByStatus[newStatus]) {
+        projectsByStatus[newStatus] = [];
       }
+      // Garante que o index não exceda o tamanho do array
+      const insertIndex = Math.min(destination.index, projectsByStatus[newStatus].length);
+      projectsByStatus[newStatus].splice(insertIndex, 0, updatedProject);
       
-      // Filtra projetos por status
-      const sourceColumn = newProjects.filter(p => p.status === source.droppableId);
-      const destColumn = newProjects.filter(p => p.status === destination.droppableId);
-      const otherProjects = newProjects.filter(p => 
-        p.status !== source.droppableId && p.status !== destination.droppableId
-      );
+      // Reconstrói a lista na ordem correta das colunas
+      const result: ProjetoWithRelations[] = [];
+      statusColumns.forEach(col => {
+        if (projectsByStatus[col.id]) {
+          result.push(...projectsByStatus[col.id]);
+        }
+      });
       
-      // Insere na posição de destino
-      destColumn.splice(destination.index, 0, movedProject);
-      
-      // Reconstrói a lista
-      return [...otherProjects, ...sourceColumn, ...destColumn];
+      return result;
     });
     
     // Faz a requisição para o servidor apenas se mudou de status
-    if (projeto.status !== newStatus) {
+    if (oldStatus !== newStatus) {
       updateProjectMutation.mutate({ id: draggableId, status: newStatus });
     }
   }, [orderedProjects, updateProjectMutation]);
