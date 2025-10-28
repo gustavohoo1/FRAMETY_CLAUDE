@@ -142,6 +142,9 @@ export default function AuthPage() {
                                 type="button"
                                 onClick={() => setShowLoginPassword(!showLoginPassword)}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                aria-label={showLoginPassword ? "Ocultar senha" : "Mostrar senha"}
+                                aria-pressed={showLoginPassword}
+                                title={showLoginPassword ? "Ocultar senha" : "Mostrar senha"}
                                 data-testid="button-toggle-login-password"
                               >
                                 {showLoginPassword ? (
@@ -257,6 +260,9 @@ export default function AuthPage() {
                                 type="button"
                                 onClick={() => setShowRegisterPassword(!showRegisterPassword)}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                aria-label={showRegisterPassword ? "Ocultar senha" : "Mostrar senha"}
+                                aria-pressed={showRegisterPassword}
+                                title={showRegisterPassword ? "Ocultar senha" : "Mostrar senha"}
                                 data-testid="button-toggle-register-password"
                               >
                                 {showRegisterPassword ? (
@@ -290,6 +296,9 @@ export default function AuthPage() {
                                 type="button"
                                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                 className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                                aria-label={showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
+                                aria-pressed={showConfirmPassword}
+                                title={showConfirmPassword ? "Ocultar senha" : "Mostrar senha"}
                                 data-testid="button-toggle-confirm-password"
                               >
                                 {showConfirmPassword ? (
