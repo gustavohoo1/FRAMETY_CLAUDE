@@ -240,7 +240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       // Define NPS validation schema
       const npsSchema = z.object({
-        npsScore: z.coerce.number().int().min(1).max(10),
+        npsScore: z.coerce.number().int().min(1).max(10).optional().nullable(),
         npsContact: z.string().trim().min(1, "Número de contato é obrigatório"),
         npsResponsible: z.string().trim().min(1, "Nome do responsável é obrigatório"),
       });
