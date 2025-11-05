@@ -36,7 +36,7 @@ export default function Finalizados() {
   
   // NPS State
   const [npsProject, setNpsProject] = useState<ProjetoWithRelations | null>(null);
-  const [npsScore, setNpsScore] = useState<number>(10);
+  const [npsScore, setNpsScore] = useState<number | null>(null);
   const [npsContact, setNpsContact] = useState("");
   const [npsResponsible, setNpsResponsible] = useState("");
   
@@ -155,7 +155,7 @@ export default function Finalizados() {
   const updateNpsMutation = useMutation({
     mutationFn: async ({ id, npsScore, npsContact, npsResponsible }: { 
       id: string; 
-      npsScore: number; 
+      npsScore: number | null; 
       npsContact: string; 
       npsResponsible: string;
     }) => {
@@ -173,7 +173,7 @@ export default function Finalizados() {
         description: "A avaliação do projeto foi registrada.",
       });
       setNpsProject(null);
-      setNpsScore(10);
+      setNpsScore(null);
       setNpsContact("");
       setNpsResponsible("");
     },
@@ -212,7 +212,7 @@ export default function Finalizados() {
 
   const handleEditNps = (projeto: ProjetoWithRelations) => {
     setNpsProject(projeto);
-    setNpsScore(projeto.npsScore || 10);
+    setNpsScore(projeto.npsScore ?? null);
     setNpsContact(projeto.npsContact || "");
     setNpsResponsible(projeto.npsResponsible || "");
   };
@@ -618,12 +618,16 @@ export default function Finalizados() {
                         <div className="border-t pt-4 space-y-2">
                           <div className="flex items-center justify-between">
                             <span className="text-sm font-medium">Avaliação NPS:</span>
-                            {projeto.npsScore && (
+                            {projeto.npsScore ? (
                               <Badge variant="outline" className="bg-yellow-50 dark:bg-yellow-950">
                                 <Star className="h-3 w-3 mr-1 fill-yellow-400 text-yellow-400" />
                                 {projeto.npsScore}/10
                               </Badge>
-                            )}
+                            ) : projeto.npsContact ? (
+                              <Badge variant="outline" className="bg-gray-50 dark:bg-gray-900">
+                                Pendente
+                              </Badge>
+                            ) : null}
                           </div>
                           <Button
                             size="sm"
@@ -633,7 +637,11 @@ export default function Finalizados() {
                             data-testid={`nps-button-${projeto.id}`}
                           >
                             <Star className="w-4 h-4 mr-2" />
-                            {projeto.npsScore ? "Editar NPS" : "Avaliar NPS"}
+                            {projeto.npsScore 
+                              ? "Editar NPS" 
+                              : projeto.npsContact 
+                                ? "Adicionar Nota" 
+                                : "Cadastrar Contato"}
                           </Button>
                         </div>
                       </CardContent>
@@ -689,17 +697,33 @@ export default function Finalizados() {
       <Dialog open={!!npsProject} onOpenChange={() => setNpsProject(null)}>
         <DialogContent data-testid="nps-dialog">
           <DialogHeader>
-            <DialogTitle>Avaliação NPS do Projeto</DialogTitle>
+            <DialogTitle>
+              {npsProject?.npsScore ? "Editar NPS" : npsProject?.npsContact ? "Adicionar Nota NPS" : "Cadastrar Contato"}
+            </DialogTitle>
             <DialogDescription>
-              Registre a avaliação de satisfação do cliente (NPS) para este projeto
+              {npsProject?.npsContact 
+                ? "Adicione ou atualize a nota de satisfação do cliente" 
+                : "Cadastre primeiro o contato do responsável, a nota pode ser adicionada depois"}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             <div>
-              <label className="text-sm font-medium mb-2 block">
-                Nota (1 a 10)
-              </label>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium">
+                  Nota (1 a 10) {!npsProject?.npsContact && <span className="text-muted-foreground">(opcional)</span>}
+                </label>
+                {npsScore && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setNpsScore(null)}
+                    className="h-6 text-xs"
+                  >
+                    Limpar
+                  </Button>
+                )}
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((score) => (
                   <button
                     key={score}
