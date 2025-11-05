@@ -304,8 +304,8 @@ export default function Metrics() {
 
       {/* Drawer para mostrar projetos do responsável */}
       <Drawer open={!!selectedResponsavel && !selectedProject} onOpenChange={(open) => !open && setSelectedResponsavel(null)}>
-        <DrawerContent className="max-h-[90vh]">
-          <DrawerHeader className="border-b px-6 py-4">
+        <DrawerContent className="max-h-[70vh] max-w-2xl mx-auto">
+          <DrawerHeader className="border-b px-6 py-4 flex-shrink-0">
             <div className="flex items-center justify-between">
               <DrawerTitle>
                 Projetos de {users.find((u: any) => u.id === selectedResponsavel)?.nome || "Responsável"}
@@ -319,7 +319,7 @@ export default function Metrics() {
               </button>
             </div>
           </DrawerHeader>
-          <ScrollArea className="flex-1 p-6">
+          <div className="overflow-y-auto p-6" style={{ maxHeight: 'calc(70vh - 80px)' }}>
             {isLoadingProjetos ? (
               <div className="space-y-4">
                 {[1, 2, 3].map((i) => (
@@ -341,7 +341,7 @@ export default function Metrics() {
                 ))}
               </div>
             )}
-          </ScrollArea>
+          </div>
         </DrawerContent>
       </Drawer>
 
