@@ -34,7 +34,7 @@ export default function Metrics() {
     queryKey: ["/api/tipos-video"],
   });
 
-  // Buscar projetos do responsável selecionado
+  // Buscar projetos do responsável selecionado (excluindo Aprovados)
   const { data: projetosResponsavel = [], isLoading: isLoadingProjetosResponsavel } = useQuery<ProjetoWithRelations[]>({
     queryKey: ["/api/projetos", "responsavel", selectedResponsavel],
     queryFn: async () => {
@@ -43,12 +43,14 @@ export default function Metrics() {
         credentials: "include",
       });
       if (!response.ok) throw new Error("Erro ao carregar projetos");
-      return response.json();
+      const projetos = await response.json();
+      // Filtrar projetos aprovados
+      return projetos.filter((p: ProjetoWithRelations) => p.status !== "Aprovado");
     },
     enabled: !!selectedResponsavel,
   });
 
-  // Buscar projetos do tipo de vídeo selecionado
+  // Buscar projetos do tipo de vídeo selecionado (excluindo Aprovados)
   const { data: projetosTipo = [], isLoading: isLoadingProjetosTipo } = useQuery<ProjetoWithRelations[]>({
     queryKey: ["/api/projetos", "tipo", selectedTipoVideo],
     queryFn: async () => {
@@ -57,7 +59,9 @@ export default function Metrics() {
         credentials: "include",
       });
       if (!response.ok) throw new Error("Erro ao carregar projetos");
-      return response.json();
+      const projetos = await response.json();
+      // Filtrar projetos aprovados
+      return projetos.filter((p: ProjetoWithRelations) => p.status !== "Aprovado");
     },
     enabled: !!selectedTipoVideo,
   });
