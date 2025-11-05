@@ -16,6 +16,7 @@ export default function Metrics() {
   const { mainContentClass } = useSidebarLayout();
   const [selectedResponsavel, setSelectedResponsavel] = useState<string | null>(null);
   const [selectedTipoVideo, setSelectedTipoVideo] = useState<string | null>(null);
+  const [selectedCliente, setSelectedCliente] = useState<string | null>(null);
   const [selectedProject, setSelectedProject] = useState<ProjetoWithRelations | null>(null);
   
   const { data: metricas, isLoading } = useQuery<any>({
@@ -32,6 +33,10 @@ export default function Metrics() {
 
   const { data: tiposVideo = [] } = useQuery<any[]>({
     queryKey: ["/api/tipos-video"],
+  });
+
+  const { data: clientes = [] } = useQuery<any[]>({
+    queryKey: ["/api/clientes"],
   });
 
   // Buscar projetos do responsável selecionado (excluindo Aprovados)
@@ -64,6 +69,24 @@ export default function Metrics() {
       return projetos.filter((p: ProjetoWithRelations) => p.status !== "Aprovado");
     },
     enabled: !!selectedTipoVideo,
+  });
+
+  // Buscar projetos do cliente selecionado (excluindo Aprovados)
+  const { data: projetosCliente = [], isLoading: isLoadingProjetosCliente } = useQuery<ProjetoWithRelations[]>({
+    queryKey: ["/api/projetos", "cliente", selectedCliente],
+    queryFn: async () => {
+      if (!selectedCliente) return [];
+      const response = await fetch(`/api/projetos`, {
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Erro ao carregar projetos");
+      const projetos = await response.json();
+      // Filtrar por cliente e excluir projetos aprovados
+      return projetos.filter((p: ProjetoWithRelations) => 
+        p.empreendimento?.clienteId === selectedCliente && p.status !== "Aprovado"
+      );
+    },
+    enabled: !!selectedCliente,
   });
 
   if (isLoading) {
@@ -105,6 +128,17 @@ export default function Metrics() {
       const tipo = tiposVideo.find((t: any) => t.nome === data.name);
       if (tipo) {
         setSelectedTipoVideo(tipo.id);
+      }
+    }
+  };
+
+  // Handler para clicar na barra do gráfico de clientes
+  const handleClienteBarClick = (data: any) => {
+    if (data && data.name) {
+      // Encontrar o cliente pelo nome
+      const cliente = clientes.find((c: any) => c.nome === data.name);
+      if (cliente) {
+        setSelectedCliente(cliente.id);
       }
     }
   };
@@ -311,7 +345,13 @@ export default function Metrics() {
                         <XAxis dataKey="name" />
                         <YAxis />
                         <Tooltip />
-                        <Bar dataKey="videos" fill="#8884d8" />
+                        <Bar 
+                          dataKey="videos" 
+                          fill="#8884d8" 
+                          onClick={handleClienteBarClick}
+                          cursor="pointer"
+                          data-testid="bar-cliente"
+                        />
                       </BarChart>
                     </ResponsiveContainer>
                   </CardContent>
@@ -416,6 +456,49 @@ export default function Metrics() {
             ) : (
               <div className="space-y-4">
                 {projetosTipo.map((projeto) => (
+                  <ProjectCard
+                    key={projeto.id}
+                    projeto={projeto}
+                    onEdit={setSelectedProject}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Drawer para mostrar projetos do cliente */}
+      <Drawer open={!!selectedCliente && !selectedProject} onOpenChange={(open) => !open && setSelectedCliente(null)}>
+        <DrawerContent className="max-h-[70vh] max-w-2xl mx-auto">
+          <DrawerHeader className="border-b px-6 py-4 flex-shrink-0">
+            <div className="flex items-center justify-between">
+              <DrawerTitle>
+                Projetos de {clientes.find((c: any) => c.id === selectedCliente)?.nome || "Cliente"}
+              </DrawerTitle>
+              <button
+                onClick={() => setSelectedCliente(null)}
+                className="rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                data-testid="close-drawer-cliente"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </DrawerHeader>
+          <div className="overflow-y-auto p-6" style={{ maxHeight: 'calc(70vh - 80px)' }}>
+            {isLoadingProjetosCliente ? (
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-32 bg-muted animate-pulse rounded-lg" />
+                ))}
+              </div>
+            ) : projetosCliente.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">Nenhum projeto encontrado para este cliente.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {projetosCliente.map((projeto) => (
                   <ProjectCard
                     key={projeto.id}
                     projeto={projeto}
