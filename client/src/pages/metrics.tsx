@@ -288,7 +288,7 @@ export default function Metrics() {
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={responsavelData}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
+                        <XAxis dataKey="name" hide />
                         <YAxis />
                         <Tooltip />
                         <Bar 
@@ -315,7 +315,7 @@ export default function Metrics() {
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={tipoData}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
+                        <XAxis dataKey="name" hide />
                         <YAxis />
                         <Tooltip />
                         <Bar 
@@ -342,7 +342,7 @@ export default function Metrics() {
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={clienteData}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
+                        <XAxis dataKey="name" hide />
                         <YAxis />
                         <Tooltip />
                         <Bar 
