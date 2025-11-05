@@ -16,7 +16,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ExternalLink, Calendar, Youtube, Edit, LayoutGrid, List as ListIcon, X, Filter } from "lucide-react";
+import { ExternalLink, Calendar, Youtube, Edit, LayoutGrid, List as ListIcon, X, Filter, Star } from "lucide-react";
 import { ProjetoWithRelations } from "@shared/schema";
 import { format, startOfMonth, endOfMonth, subMonths, isWithinInterval } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -33,6 +33,12 @@ export default function Finalizados() {
   const { mainContentClass } = useSidebarLayout();
   const [editingProject, setEditingProject] = useState<ProjetoWithRelations | null>(null);
   const [youtubeLink, setYoutubeLink] = useState("");
+  
+  // NPS State
+  const [npsProject, setNpsProject] = useState<ProjetoWithRelations | null>(null);
+  const [npsScore, setNpsScore] = useState<number>(10);
+  const [npsContact, setNpsContact] = useState("");
+  const [npsResponsible, setNpsResponsible] = useState("");
   
   // View mode com persistência
   const [viewMode, setViewMode] = useState<ViewMode>(() => {
@@ -146,6 +152,40 @@ export default function Finalizados() {
     },
   });
 
+  const updateNpsMutation = useMutation({
+    mutationFn: async ({ id, npsScore, npsContact, npsResponsible }: { 
+      id: string; 
+      npsScore: number; 
+      npsContact: string; 
+      npsResponsible: string;
+    }) => {
+      const response = await apiRequest("PUT", `/api/projetos/${id}/nps`, { 
+        npsScore, 
+        npsContact, 
+        npsResponsible 
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/projetos"] });
+      toast({
+        title: "NPS salvo com sucesso!",
+        description: "A avaliação do projeto foi registrada.",
+      });
+      setNpsProject(null);
+      setNpsScore(10);
+      setNpsContact("");
+      setNpsResponsible("");
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao salvar NPS",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleEditYoutubeLink = (projeto: ProjetoWithRelations) => {
     setEditingProject(projeto);
     setYoutubeLink(projeto.linkYoutube || "");
@@ -167,6 +207,42 @@ export default function Finalizados() {
     updateProjectMutation.mutate({ 
       id: editingProject.id, 
       linkYoutube: youtubeLink 
+    });
+  };
+
+  const handleEditNps = (projeto: ProjetoWithRelations) => {
+    setNpsProject(projeto);
+    setNpsScore(projeto.npsScore || 10);
+    setNpsContact(projeto.npsContact || "");
+    setNpsResponsible(projeto.npsResponsible || "");
+  };
+
+  const handleSaveNps = () => {
+    if (!npsProject) return;
+
+    if (!npsContact.trim()) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Por favor, preencha o número de contato.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!npsResponsible.trim()) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Por favor, preencha o nome do responsável.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    updateNpsMutation.mutate({
+      id: npsProject.id,
+      npsScore,
+      npsContact: npsContact.trim(),
+      npsResponsible: npsResponsible.trim(),
     });
   };
 
@@ -537,6 +613,29 @@ export default function Finalizados() {
                             )
                           )}
                         </div>
+
+                        {/* NPS Section */}
+                        <div className="border-t pt-4 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm font-medium">Avaliação NPS:</span>
+                            {projeto.npsScore && (
+                              <Badge variant="outline" className="bg-yellow-50 dark:bg-yellow-950">
+                                <Star className="h-3 w-3 mr-1 fill-yellow-400 text-yellow-400" />
+                                {projeto.npsScore}/10
+                              </Badge>
+                            )}
+                          </div>
+                          <Button
+                            size="sm"
+                            variant={projeto.npsScore ? "ghost" : "outline"}
+                            onClick={() => handleEditNps(projeto)}
+                            className="w-full"
+                            data-testid={`nps-button-${projeto.id}`}
+                          >
+                            <Star className="w-4 h-4 mr-2" />
+                            {projeto.npsScore ? "Editar NPS" : "Avaliar NPS"}
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
                   ))}
@@ -580,6 +679,75 @@ export default function Finalizados() {
                 data-testid="save-youtube-link"
               >
                 {updateProjectMutation.isPending ? "Salvando..." : "Salvar"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* NPS Dialog */}
+      <Dialog open={!!npsProject} onOpenChange={() => setNpsProject(null)}>
+        <DialogContent data-testid="nps-dialog">
+          <DialogHeader>
+            <DialogTitle>Avaliação NPS do Projeto</DialogTitle>
+            <DialogDescription>
+              Registre a avaliação de satisfação do cliente (NPS) para este projeto
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                Nota (1 a 10)
+              </label>
+              <div className="flex items-center gap-2">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((score) => (
+                  <button
+                    key={score}
+                    onClick={() => setNpsScore(score)}
+                    className={`w-10 h-10 rounded-md border-2 transition-all ${
+                      npsScore === score
+                        ? "border-primary bg-primary text-primary-foreground"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                    data-testid={`nps-score-${score}`}
+                  >
+                    {score}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Número de Contato *</label>
+              <Input
+                value={npsContact}
+                onChange={(e) => setNpsContact(e.target.value)}
+                placeholder="(11) 99999-9999"
+                data-testid="nps-contact-input"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Nome do Responsável *</label>
+              <Input
+                value={npsResponsible}
+                onChange={(e) => setNpsResponsible(e.target.value)}
+                placeholder="Nome completo"
+                data-testid="nps-responsible-input"
+              />
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                onClick={() => setNpsProject(null)}
+                data-testid="cancel-nps"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleSaveNps}
+                disabled={updateNpsMutation.isPending}
+                data-testid="save-nps"
+              >
+                {updateNpsMutation.isPending ? "Salvando..." : "Salvar NPS"}
               </Button>
             </div>
           </div>
