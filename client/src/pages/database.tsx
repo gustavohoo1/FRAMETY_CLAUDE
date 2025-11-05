@@ -35,6 +35,10 @@ export default function DatabasePage() {
   const [createEmpreendimentoDialogOpen, setCreateEmpreendimentoDialogOpen] = useState(false);
   const [editingEmpreendimento, setEditingEmpreendimento] = useState<EmpreendimentoWithRelations | null>(null);
 
+  // Search states
+  const [searchCliente, setSearchCliente] = useState("");
+  const [searchEmpreendimento, setSearchEmpreendimento] = useState("");
+
   const { data: clientes = [], isLoading } = useQuery<Cliente[]>({
     queryKey: ["/api/clientes"],
   });
@@ -46,6 +50,29 @@ export default function DatabasePage() {
 
   const { data: empreendimentos = [] } = useQuery<EmpreendimentoWithRelations[]>({
     queryKey: ["/api/empreendimentos"],
+  });
+
+  // Filter clientes based on search
+  const filteredClientes = clientes.filter((cliente) => {
+    if (!searchCliente) return true;
+    const searchLower = searchCliente.toLowerCase();
+    return (
+      cliente.nome.toLowerCase().includes(searchLower) ||
+      cliente.email?.toLowerCase().includes(searchLower) ||
+      cliente.empresa?.toLowerCase().includes(searchLower) ||
+      cliente.telefone?.toLowerCase().includes(searchLower)
+    );
+  });
+
+  // Filter empreendimentos based on search
+  const filteredEmpreendimentos = empreendimentos.filter((emp) => {
+    if (!searchEmpreendimento) return true;
+    const searchLower = searchEmpreendimento.toLowerCase();
+    return (
+      emp.nome.toLowerCase().includes(searchLower) ||
+      emp.descricao?.toLowerCase().includes(searchLower) ||
+      emp.cliente?.nome?.toLowerCase().includes(searchLower)
+    );
   });
 
   const createForm = useForm<InsertCliente>({
@@ -504,9 +531,19 @@ export default function DatabasePage() {
                   <CardDescription>
                     Gerencie todos os clientes do sistema
                   </CardDescription>
+                  <div className="pt-4">
+                    <Input
+                      type="text"
+                      placeholder="Pesquisar por nome, email, telefone ou empresa..."
+                      value={searchCliente}
+                      onChange={(e) => setSearchCliente(e.target.value)}
+                      className="max-w-md"
+                      data-testid="input-search-cliente"
+                    />
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  {clientes.length > 0 ? (
+                  {filteredClientes.length > 0 ? (
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -519,7 +556,7 @@ export default function DatabasePage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {clientes.map((cliente) => (
+                        {filteredClientes.map((cliente) => (
                           <TableRow key={cliente.id} data-testid={`row-client-${cliente.id}`}>
                             <TableCell className="font-medium" data-testid={`text-nome-${cliente.id}`}>
                               {cliente.nome}
@@ -612,9 +649,19 @@ export default function DatabasePage() {
                   <CardDescription>
                     Gerencie todos os empreendimentos do sistema
                   </CardDescription>
+                  <div className="pt-4">
+                    <Input
+                      type="text"
+                      placeholder="Pesquisar por nome, descrição ou cliente..."
+                      value={searchEmpreendimento}
+                      onChange={(e) => setSearchEmpreendimento(e.target.value)}
+                      className="max-w-md"
+                      data-testid="input-search-empreendimento"
+                    />
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  {empreendimentos.length > 0 ? (
+                  {filteredEmpreendimentos.length > 0 ? (
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -626,7 +673,7 @@ export default function DatabasePage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {empreendimentos.map((empreendimento) => (
+                        {filteredEmpreendimentos.map((empreendimento) => (
                           <TableRow key={empreendimento.id}>
                             <TableCell className="font-medium">{empreendimento.nome}</TableCell>
                             <TableCell>{empreendimento.cliente?.nome}</TableCell>
