@@ -142,33 +142,39 @@ export default function Dashboard() {
               <span className="text-sm text-muted-foreground">Filtros:</span>
             </div>
             
-            <Select value={filters.responsavelId} onValueChange={(value) => handleFilterChange("responsavelId", value === "all" ? "" : value)}>
-              <SelectTrigger className="w-40" data-testid="filter-responsavel">
-                <SelectValue placeholder="Responsável" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Responsável</SelectItem>
-                {users.map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">Responsável</label>
+              <Select value={filters.responsavelId} onValueChange={(value) => handleFilterChange("responsavelId", value === "all" ? "" : value)}>
+                <SelectTrigger className="w-40" data-testid="filter-responsavel">
+                  <SelectValue placeholder="Responsável" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  {users.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             
-            <Select value={filters.tipoVideoId} onValueChange={(value) => handleFilterChange("tipoVideoId", value === "all" ? "" : value)}>
-              <SelectTrigger className="w-40" data-testid="filter-tipo">
-                <SelectValue placeholder="Tipo" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tipo de Vídeos</SelectItem>
-                {tiposVideo.map((tipo) => (
-                  <SelectItem key={tipo.id} value={tipo.id}>
-                    {tipo.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">Tipo</label>
+              <Select value={filters.tipoVideoId} onValueChange={(value) => handleFilterChange("tipoVideoId", value === "all" ? "" : value)}>
+                <SelectTrigger className="w-40" data-testid="filter-tipo">
+                  <SelectValue placeholder="Tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  {tiposVideo.map((tipo) => (
+                    <SelectItem key={tipo.id} value={tipo.id}>
+                      {tipo.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             
             {Object.values(filters).some(Boolean) && (
               <Button

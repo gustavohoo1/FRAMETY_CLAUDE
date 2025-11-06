@@ -324,53 +324,64 @@ export default function Finalizados() {
             </div>
             
             {/* Filtro de Data */}
-            <Select value={dateFilter} onValueChange={setDateFilter}>
-              <SelectTrigger className="w-48" data-testid="filter-date">
-                <SelectValue placeholder="Período" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos os períodos</SelectItem>
-                <SelectItem value="this_month">Este mês</SelectItem>
-                <SelectItem value="last_month">Mês passado</SelectItem>
-                <SelectItem value="custom">Período personalizado</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">Período</label>
+              <Select value={dateFilter} onValueChange={setDateFilter}>
+                <SelectTrigger className="w-48" data-testid="filter-date">
+                  <SelectValue placeholder="Período" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="this_month">Este mês</SelectItem>
+                  <SelectItem value="last_month">Mês passado</SelectItem>
+                  <SelectItem value="custom">Período personalizado</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             
             {/* Campos de data personalizada */}
             {dateFilter === "custom" && (
               <>
-                <Input
-                  type="date"
-                  value={customDateStart}
-                  onChange={(e) => setCustomDateStart(e.target.value)}
-                  className="w-40"
-                  data-testid="custom-date-start"
-                />
-                <span className="text-sm text-muted-foreground">até</span>
-                <Input
-                  type="date"
-                  value={customDateEnd}
-                  onChange={(e) => setCustomDateEnd(e.target.value)}
-                  className="w-40"
-                  data-testid="custom-date-end"
-                />
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground">Data Inicial</label>
+                  <Input
+                    type="date"
+                    value={customDateStart}
+                    onChange={(e) => setCustomDateStart(e.target.value)}
+                    className="w-40"
+                    data-testid="custom-date-start"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-muted-foreground">Data Final</label>
+                  <Input
+                    type="date"
+                    value={customDateEnd}
+                    onChange={(e) => setCustomDateEnd(e.target.value)}
+                    className="w-40"
+                    data-testid="custom-date-end"
+                  />
+                </div>
               </>
             )}
             
             {/* Filtro de Responsável */}
-            <Select value={responsavelFilter} onValueChange={setResponsavelFilter}>
-              <SelectTrigger className="w-48" data-testid="filter-responsavel">
-                <SelectValue placeholder="Responsável" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Responsável</SelectItem>
-                {responsaveis.map((resp) => (
-                  <SelectItem key={resp.id} value={resp.id}>
-                    {resp.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="space-y-2">
+              <label className="text-xs font-medium text-muted-foreground">Responsável</label>
+              <Select value={responsavelFilter} onValueChange={setResponsavelFilter}>
+                <SelectTrigger className="w-48" data-testid="filter-responsavel">
+                  <SelectValue placeholder="Responsável" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos</SelectItem>
+                  {responsaveis.map((resp) => (
+                    <SelectItem key={resp.id} value={resp.id}>
+                      {resp.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             
             {/* Chips de filtros ativos e botão limpar */}
             {hasActiveFilters && (
