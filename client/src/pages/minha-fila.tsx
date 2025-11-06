@@ -19,7 +19,6 @@ export default function MinhaFila() {
   const { mainContentClass } = useSidebarLayout();
   const [filters, setFilters] = useState({
     status: "all",
-    prioridade: "all",
     search: "",
   });
   const [selectedResponsavel, setSelectedResponsavel] = useState(user?.id || "");
@@ -64,7 +63,6 @@ export default function MinhaFila() {
   const clearFilters = () => {
     setFilters({
       status: "all",
-      prioridade: "all",
       search: "",
     });
   };
@@ -196,18 +194,6 @@ export default function MinhaFila() {
                 <SelectItem value="Captação">Captação</SelectItem>
                 <SelectItem value="Edição">Edição</SelectItem>
                 <SelectItem value="Aguardando Aprovação">Aguardando Aprovação</SelectItem>
-              </SelectContent>
-            </Select>
-            
-            <Select value={filters.prioridade} onValueChange={(value) => handleFilterChange("prioridade", value === "all" ? "" : value)}>
-              <SelectTrigger className="w-40" data-testid="filter-priority">
-                <SelectValue placeholder="Prioridade" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas</SelectItem>
-                <SelectItem value="Alta">Alta</SelectItem>
-                <SelectItem value="Média">Média</SelectItem>
-                <SelectItem value="Baixa">Baixa</SelectItem>
               </SelectContent>
             </Select>
             
