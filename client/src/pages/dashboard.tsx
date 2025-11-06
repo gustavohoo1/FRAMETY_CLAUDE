@@ -163,7 +163,7 @@ export default function Dashboard() {
                 <SelectValue placeholder="Tipo" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
+                <SelectItem value="all">Tipo de Vídeos</SelectItem>
                 {tiposVideo.map((tipo) => (
                   <SelectItem key={tipo.id} value={tipo.id}>
                     {tipo.nome}
