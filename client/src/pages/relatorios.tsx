@@ -286,7 +286,7 @@ export default function Relatorios() {
                   <SelectValue placeholder="Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos</SelectItem>
+                  <SelectItem value="all">Status</SelectItem>
                   <SelectItem value="Briefing">Briefing</SelectItem>
                   <SelectItem value="Roteiro">Roteiro</SelectItem>
                   <SelectItem value="Captação">Captação</SelectItem>
