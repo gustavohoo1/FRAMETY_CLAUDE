@@ -109,7 +109,7 @@ export default function Relatorios() {
       projeto.status,
       projeto.responsavel?.nome || "",
       projeto.tipoVideo?.nome || "",
-      projeto.cliente || "",
+      projeto.cliente?.nome || "",
       projeto.dataCriacao ? format(new Date(projeto.dataCriacao), "dd/MM/yyyy", { locale: ptBR }) : "",
       projeto.dataPrevistaEntrega ? format(new Date(projeto.dataPrevistaEntrega), "dd/MM/yyyy", { locale: ptBR }) : "",
       projeto.dataAprovacao ? format(new Date(projeto.dataAprovacao), "dd/MM/yyyy", { locale: ptBR }) : "",
@@ -480,6 +480,7 @@ export default function Relatorios() {
                       <Table>
                         <TableHeader>
                           <TableRow>
+                            <TableHead>ID</TableHead>
                             <TableHead>Título</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead>Responsável</TableHead>
@@ -499,6 +500,9 @@ export default function Relatorios() {
                             
                             return (
                               <TableRow key={projeto.id} data-testid={`project-row-${projeto.id}`}>
+                                <TableCell className="font-mono text-sm" data-testid="cell-id">
+                                  #{`SKY${projeto.sequencialId}`}
+                                </TableCell>
                                 <TableCell className="font-medium" data-testid="cell-title">
                                   {projeto.titulo}
                                 </TableCell>
