@@ -24,7 +24,21 @@ async function hashPassword(password: string) {
 }
 
 async function comparePasswords(supplied: string, stored: string) {
+  // Check if password has the correct format (hash.salt)
+  if (!stored.includes(".")) {
+    // Old format or invalid password - return false to force password reset
+    console.warn("Password in invalid format (missing salt). User needs password reset.");
+    return false;
+  }
+  
   const [hashed, salt] = stored.split(".");
+  
+  // Validate that both hash and salt exist
+  if (!hashed || !salt) {
+    console.warn("Password has invalid format. User needs password reset.");
+    return false;
+  }
+  
   const hashedBuf = Buffer.from(hashed, "hex");
   const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
   return timingSafeEqual(hashedBuf, suppliedBuf);
