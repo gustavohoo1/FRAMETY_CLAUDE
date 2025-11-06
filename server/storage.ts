@@ -31,7 +31,7 @@ import {
   type InsertNota
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, and, or, like, desc, asc, sql, gte, lte } from "drizzle-orm";
+import { eq, and, or, like, desc, asc, sql, gte, lte, max } from "drizzle-orm";
 import session from "express-session";
 import connectPg from "connect-pg-simple";
 import { pool } from "./db";
@@ -295,9 +295,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createProjeto(projeto: InsertProjeto): Promise<Projeto> {
+    // Buscar o maior sequencialId existente
+    const result = await db
+      .select({ maxId: max(projetos.sequencialId) })
+      .from(projetos);
+    
+    const maxSequencialId = result[0]?.maxId || 0;
+    const nextSequencialId = maxSequencialId + 1;
+    
+    // Criar projeto com o próximo sequencialId
     const [newProjeto] = await db
       .insert(projetos)
-      .values(projeto)
+      .values({
+        ...projeto,
+        sequencialId: nextSequencialId,
+      })
       .returning();
     return newProjeto;
   }
