@@ -41,6 +41,7 @@ import {
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
+import { formatSequentialId } from "@/lib/utils";
 
 // Schema específico para o formulário que aceita string no campo duracao
 const formSchema = insertProjetoSchema.extend({
@@ -321,9 +322,18 @@ export function ProjectDetailsDrawer({
     <Drawer open={isOpen} onOpenChange={onClose}>
       <DrawerContent className="max-h-[90vh] max-w-4xl mx-auto">
         <DrawerHeader className="flex items-center justify-between border-b px-6 py-4">
-          <DrawerTitle className="text-xl font-semibold">
-            {projeto.titulo}
-          </DrawerTitle>
+          <div className="flex items-center gap-3">
+            <Badge 
+              variant="outline" 
+              className="text-sm font-mono font-semibold px-2.5 py-1 rounded-md bg-secondary/50"
+              data-testid="project-details-sequential-id"
+            >
+              {formatSequentialId(projeto.sequencialId)}
+            </Badge>
+            <DrawerTitle className="text-xl font-semibold">
+              {projeto.titulo}
+            </DrawerTitle>
+          </div>
           <div className="flex items-center gap-2">
             {!isEditing ? (
               <Button
