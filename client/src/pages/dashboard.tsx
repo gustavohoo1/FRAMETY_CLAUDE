@@ -21,7 +21,6 @@ export default function Dashboard() {
   const [filters, setFilters] = useState({
     responsavelId: "all",
     tipoVideoId: "all",
-    prioridade: "all",
     search: "",
   });
 
@@ -69,7 +68,6 @@ export default function Dashboard() {
     setFilters({
       responsavelId: "all",
       tipoVideoId: "all",
-      prioridade: "all",
       search: "",
     });
   };
@@ -169,18 +167,6 @@ export default function Dashboard() {
                     {tipo.nome}
                   </SelectItem>
                 ))}
-              </SelectContent>
-            </Select>
-            
-            <Select value={filters.prioridade} onValueChange={(value) => handleFilterChange("prioridade", value === "all" ? "" : value)}>
-              <SelectTrigger className="w-40" data-testid="filter-prioridade">
-                <SelectValue placeholder="Prioridade" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todas</SelectItem>
-                <SelectItem value="Alta">Alta</SelectItem>
-                <SelectItem value="Média">Média</SelectItem>
-                <SelectItem value="Baixa">Baixa</SelectItem>
               </SelectContent>
             </Select>
             
