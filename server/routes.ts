@@ -380,6 +380,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.post("/api/projetos/:id/duplicar", requireAuth, async (req, res, next) => {
+    try {
+      const projetoOriginal = await storage.getProjeto(req.params.id);
+      if (!projetoOriginal) {
+        return res.status(404).json({ message: "Projeto não encontrado" });
+      }
+
+      const projetoDuplicado = await storage.duplicarProjeto(req.params.id);
+      
+      // Create initial status log for duplicated project
+      await storage.createLogStatus({
+        projetoId: projetoDuplicado.id,
+        statusAnterior: null,
+        statusNovo: projetoDuplicado.status,
+        alteradoPorId: req.user!.id,
+      });
+
+      res.status(201).json(projetoDuplicado);
+    } catch (error) {
+      next(error);
+    }
+  });
+
   app.patch("/api/projetos/:id", requireAuth, requireRole(["Admin", "Gestor"]), async (req, res, next) => {
     try {
       const projetoExistente = await storage.getProjeto(req.params.id);

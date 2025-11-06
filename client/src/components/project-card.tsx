@@ -2,7 +2,7 @@ import { memo } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, AlertTriangle, Trash2 } from "lucide-react";
+import { Calendar, AlertTriangle, Trash2, Copy } from "lucide-react";
 import { ProjetoWithRelations } from "@shared/schema";
 import { format, isBefore, startOfDay } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -12,6 +12,7 @@ interface ProjectCardProps {
   isDragging?: boolean;
   onEdit?: (projeto: ProjetoWithRelations) => void;
   onDelete?: (projetoId: string) => void;
+  onDuplicate?: (projetoId: string) => void;
 }
 
 const priorityColors = {
@@ -33,7 +34,7 @@ const statusColors = {
   "Cancelado": "bg-red-100 dark:bg-red-900/20 text-red-800 dark:text-red-200",
 };
 
-const ProjectCardComponent = ({ projeto, isDragging, onEdit, onDelete }: ProjectCardProps) => {
+const ProjectCardComponent = ({ projeto, isDragging, onEdit, onDelete, onDuplicate }: ProjectCardProps) => {
   const isOverdue = projeto.dataPrevistaEntrega && 
     isBefore(startOfDay(new Date(projeto.dataPrevistaEntrega)), startOfDay(new Date())) && 
     !["Aprovado", "Cancelado"].includes(projeto.status);
@@ -105,6 +106,21 @@ const ProjectCardComponent = ({ projeto, isDragging, onEdit, onDelete }: Project
 
         <div className="flex items-center justify-between pt-2 border-t">
           <div className="flex items-center gap-2">
+            {onDuplicate && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-9 w-9 md:h-7 md:w-7 p-0 rounded-lg hover:bg-primary hover:text-primary-foreground active:scale-95 transition-transform"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDuplicate(projeto.id);
+                }}
+                data-testid={`duplicate-project-${projeto.id}`}
+              >
+                <Copy className="h-4 w-4 md:h-3.5 md:w-3.5" />
+              </Button>
+            )}
+            
             {onDelete && (
               <Button
                 variant="ghost"

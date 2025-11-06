@@ -63,6 +63,7 @@ export interface IStorage {
   createProjeto(projeto: InsertProjeto): Promise<Projeto>;
   updateProjeto(id: string, projeto: Partial<InsertProjeto>): Promise<Projeto>;
   deleteProjeto(id: string): Promise<void>;
+  duplicarProjeto(id: string): Promise<Projeto>;
   
   // Tipos de Video
   getTiposDeVideo(): Promise<TipoVideo[]>;
@@ -322,6 +323,56 @@ export class DatabaseStorage implements IStorage {
       // Finally delete the project
       await tx.delete(projetos).where(eq(projetos.id, id));
     });
+  }
+
+  async duplicarProjeto(id: string): Promise<Projeto> {
+    // Buscar projeto original
+    const [projetoOriginal] = await db
+      .select()
+      .from(projetos)
+      .where(eq(projetos.id, id));
+
+    if (!projetoOriginal) {
+      throw new Error("Projeto não encontrado");
+    }
+
+    // Criar cópia do projeto (novo ID, nova data de criação, sem data de aprovação)
+    const novoProjeto: InsertProjeto = {
+      titulo: projetoOriginal.titulo,
+      descricao: projetoOriginal.descricao,
+      tipoVideoId: projetoOriginal.tipoVideoId,
+      tags: projetoOriginal.tags,
+      status: projetoOriginal.status,
+      responsavelId: projetoOriginal.responsavelId,
+      dataPrevistaEntrega: projetoOriginal.dataPrevistaEntrega,
+      prioridade: projetoOriginal.prioridade,
+      clienteId: projetoOriginal.clienteId,
+      empreendimentoId: projetoOriginal.empreendimentoId,
+      anexos: projetoOriginal.anexos,
+      linkYoutube: projetoOriginal.linkYoutube,
+      duracao: projetoOriginal.duracao,
+      formato: projetoOriginal.formato,
+      captacao: projetoOriginal.captacao,
+      roteiro: projetoOriginal.roteiro,
+      locucao: projetoOriginal.locucao,
+      dataInterna: projetoOriginal.dataInterna,
+      dataMeeting: projetoOriginal.dataMeeting,
+      linkFrameIo: projetoOriginal.linkFrameIo,
+      caminho: projetoOriginal.caminho,
+      referencias: projetoOriginal.referencias,
+      informacoesAdicionais: projetoOriginal.informacoesAdicionais,
+      npsScore: projetoOriginal.npsScore,
+      npsContact: projetoOriginal.npsContact,
+      npsResponsible: projetoOriginal.npsResponsible,
+    };
+
+    // Inserir projeto duplicado
+    const [projetoDuplicado] = await db
+      .insert(projetos)
+      .values(novoProjeto)
+      .returning();
+
+    return projetoDuplicado;
   }
 
   async getTiposDeVideo(): Promise<TipoVideo[]> {

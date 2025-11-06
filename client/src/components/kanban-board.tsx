@@ -148,6 +148,28 @@ export function KanbanBoard({ filters }: KanbanBoardProps) {
     },
   });
 
+  const duplicateProjectMutation = useMutation({
+    mutationFn: async (projetoId: string) => {
+      const response = await apiRequest("POST", `/api/projetos/${projetoId}/duplicar`);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/projetos"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/metricas"] });
+      toast({
+        title: "Projeto duplicado",
+        description: "O projeto foi duplicado com sucesso. Agora você pode editá-lo.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Erro ao duplicar projeto",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   // Memoizar agrupamento de projetos por status para evitar recalcular em cada render
   const projectsByStatus = useMemo(() => {
     const grouped: Record<string, ProjetoWithRelations[]> = {};
@@ -271,6 +293,7 @@ export function KanbanBoard({ filters }: KanbanBoardProps) {
                                     isDragging={snapshot.isDragging || draggedItem === projeto.id}
                                     onEdit={setSelectedProject}
                                     onDelete={(projetoId) => deleteProjectMutation.mutate(projetoId)}
+                                    onDuplicate={(projetoId) => duplicateProjectMutation.mutate(projetoId)}
                                   />
                                 </div>
                               )}
